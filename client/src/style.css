@@ -1,0 +1,90 @@
+/* -------------------------------------------
+   GLOBAL ROOT VARIABLES
+-------------------------------------------- */
+:root {
+  --bg-main: #0c0c11;
+  --text-main: #f6f6ff;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  color-scheme: dark;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+}
+
+/* -------------------------------------------
+   RESET ESSENTIALS
+-------------------------------------------- */
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  overflow-x: hidden; /* prevent sideways scroll */
+}
+
+/* remove Vite's default centering */
+body {
+  display: block;
+  place-items: unset;
+}
+
+/* -------------------------------------------
+   LINKS
+-------------------------------------------- */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* -------------------------------------------
+   BUTTON RESET (we use custom styles in components)
+-------------------------------------------- */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+/* -------------------------------------------
+   INPUT RESET
+-------------------------------------------- */
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* -------------------------------------------
+   REMOVE VITE DEFAULT CARD STYLING
+-------------------------------------------- */
+.card {
+  padding: 0;
+}
+
+/* -------------------------------------------
+   REMOVE MAX-WIDTH FROM #app (VERY IMPORTANT)
+-------------------------------------------- */
+#app {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
