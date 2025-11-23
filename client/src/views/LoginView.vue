@@ -5,13 +5,23 @@ import { setAuth } from "../auth";
 
 const router = useRouter();
 
+// mode: "login" or "register"
+const mode = ref("login");
+
 const email = ref("");
 const password = ref("");
+const name = ref("");
+const confirmPassword = ref("");
+const companyName = ref("");
+
 const loading = ref(false);
 const error = ref("");
+const info = ref("");
 
 async function handleLogin() {
   error.value = "";
+  info.value = "";
+
   if (!email.value || !password.value) {
     error.value = "Please fill in email and password.";
     return;
@@ -51,190 +61,319 @@ async function handleLogin() {
     loading.value = false;
   }
 }
+
+async function handleRegister() {
+  error.value = "";
+  info.value = "";
+
+  if (!name.value || !email.value || !password.value || !confirmPassword.value) {
+    error.value = "Please fill in all required fields.";
+    return;
+  }
+
+  if (password.value !== confirmPassword.value) {
+    error.value = "Passwords do not match.";
+    return;
+  }
+
+  if (password.value.length < 6) {
+    error.value = "Password must be at least 6 characters.";
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    const response = await fetch("http://localhost:4000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        companyName: companyName.value || null,
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.message || "Registration failed");
+    }
+
+    // backend returns { user, token } → auto-login
+    if (data.user && data.token) {
+      setAuth(data.user, data.token);
+
+      if (data.user.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/buyer");
+      }
+      return;
+    }
+
+    // fallback: show message and switch to login
+    info.value = data.message || "Registration successful! You can now log in.";
+    mode.value = "login";
+    password.value = "";
+    confirmPassword.value = "";
+  } catch (err) {
+    console.error(err);
+    error.value = err.message || "Error while registering.";
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <template>
-  <div class="login-wrapper">
-    <div class="login-card">
-
-      <div class="card-header">
-        <div class="logo-circle">🥕</div>
-        <h2>Welcome back</h2>
-        <p class="subtitle">Sign in to continue</p>
+  <div class="w-full flex justify-center py-7 px-4">
+    <div
+      class="w-full max-w-md rounded-2xl border border-amber-200/70 bg-gradient-to-b from-amber-50 to-emerald-50 shadow-xl shadow-amber-200/60 px-7 py-6"
+    >
+      <!-- Header -->
+      <div class="text-center mb-5">
+        <div
+          class="mx-auto mb-3 flex h-18 w-18 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-emerald-300 text-3xl shadow-lg shadow-amber-300/60"
+          style="width: 72px; height: 72px;"
+        >
+          🍅
+        </div>
+        <h2 class="m-0 text-[1.55rem] font-semibold text-[#2f3a2b]">
+          {{ mode === "login" ? "Welcome back" : "Create your account" }}
+        </h2>
+        <p class="mt-1 text-[0.95rem] text-[#747c69]">
+          {{
+            mode === "login"
+              ? "Sign in to continue"
+              : "Register as a buyer to start ordering"
+          }}
+        </p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="field">
-          <label for="email">📧 Email</label>
+      <!-- LOGIN FORM -->
+      <form
+        v-if="mode === 'login'"
+        @submit.prevent="handleLogin"
+        class="flex flex-col gap-4"
+      >
+        <div class="flex flex-col gap-1">
+          <label
+            for="email"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            📧 Email
+          </label>
           <input
             id="email"
             v-model="email"
             type="email"
             placeholder="buyer@example.com"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
           />
         </div>
 
-        <div class="field">
-          <label for="password">🔑 Password</label>
+        <div class="flex flex-col gap-1">
+          <label
+            for="password"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            🔑 Password
+          </label>
           <input
             id="password"
             v-model="password"
             type="password"
             placeholder="Your password"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
           />
         </div>
 
-        <div v-if="error" class="error">{{ error }}</div>
+        <div
+          v-if="error"
+          class="rounded-[10px] border border-[#f3c5c9] bg-[#ffe7e8] px-3 py-2 text-[0.86rem] text-center text-[#8b323a]"
+        >
+          {{ error }}
+        </div>
 
-        <button class="btn-login" type="submit" :disabled="loading">
+        <div
+          v-if="info"
+          class="rounded-[10px] border border-[#b4ddc0] bg-[#e0f3e6] px-3 py-2 text-[0.86rem] text-center text-[#25633e]"
+        >
+          {{ info }}
+        </div>
+
+        <button
+          type="submit"
+          :disabled="loading"
+          class="mt-1 w-full rounded-full border-none bg-gradient-to-br from-[#f2b075] to-[#8ac79e] px-4 py-2.5 text-[1rem] font-medium text-[#2f3a2b] shadow-md shadow-[#99a98c66] transition hover:-translate-y-[2px] hover:shadow-xl disabled:cursor-default disabled:opacity-55"
+        >
           {{ loading ? "Logging in..." : "Login" }}
+        </button>
+
+        <!-- divider -->
+        <div
+          class="mt-2 mb-1 flex items-center justify-center gap-3 text-[0.78rem] uppercase tracking-[0.08em] text-[#a0a797]"
+        >
+          <span class="h-px flex-1 bg-gradient-to-r from-transparent via-[#beb8a0cc] to-transparent" />
+          <span>or</span>
+          <span class="h-px flex-1 bg-gradient-to-r from-transparent via-[#beb8a0cc] to-transparent" />
+        </div>
+
+        <button
+          type="button"
+          class="w-full rounded-full border-none bg-gradient-to-br from-[#f2b075a6] to-[#8ac79ea6] px-4 py-2.5 text-[0.95rem] font-medium text-[#2f3a2b] shadow-md shadow-[#99a98c66] transition hover:-translate-y-[2px] hover:shadow-xl"
+          @click="
+            mode = 'register';
+            error = '';
+            info = '';
+          "
+        >
+          Create a buyer account
         </button>
       </form>
 
-      <p class="hint">
+      <!-- REGISTER FORM -->
+      <form
+        v-else
+        @submit.prevent="handleRegister"
+        class="flex flex-col gap-4"
+      >
+        <div class="flex flex-col gap-1">
+          <label
+            for="name"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            👤 Name
+          </label>
+          <input
+            id="name"
+            v-model="name"
+            type="text"
+            placeholder="Your full name"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label
+            for="company"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            🏬 Company name (optional)
+          </label>
+          <input
+            id="company"
+            v-model="companyName"
+            type="text"
+            placeholder="Your company"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label
+            for="reg-email"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            📧 Email
+          </label>
+          <input
+            id="reg-email"
+            v-model="email"
+            type="email"
+            placeholder="you@company.com"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label
+            for="reg-password"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            🔑 Password
+          </label>
+          <input
+            id="reg-password"
+            v-model="password"
+            type="password"
+            placeholder="Choose a password"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label
+            for="reg-confirm"
+            class="text-[0.85rem] text-[#4f5a43]"
+          >
+            ✅ Confirm password
+          </label>
+          <input
+            id="reg-confirm"
+            v-model="confirmPassword"
+            type="password"
+            placeholder="Repeat your password"
+            class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
+          />
+        </div>
+
+        <div
+          v-if="error"
+          class="rounded-[10px] border border-[#f3c5c9] bg-[#ffe7e8] px-3 py-2 text-[0.86rem] text-center text-[#8b323a]"
+        >
+          {{ error }}
+        </div>
+
+        <div
+          v-if="info"
+          class="rounded-[10px] border border-[#b4ddc0] bg-[#e0f3e6] px-3 py-2 text-[0.86rem] text-center text-[#25633e]"
+        >
+          {{ info }}
+        </div>
+
+        <button
+          type="submit"
+          :disabled="loading"
+          class="mt-1 w-full rounded-full border-none bg-gradient-to-br from-[#f2b075] to-[#8ac79e] px-4 py-2.5 text-[1rem] font-medium text-[#2f3a2b] shadow-md shadow-[#99a98c66] transition hover:-translate-y-[2px] hover:shadow-xl disabled:cursor-default disabled:opacity-55"
+        >
+          {{ loading ? "Creating account..." : "Register" }}
+        </button>
+
+        <p class="mt-2 text-center text-[0.82rem] text-[#6b7460]">
+          Already have an account?
+          <button
+            type="button"
+            class="ml-1 cursor-pointer border-none bg-transparent p-0 text-[0.82rem] font-semibold text-[#4c8f6a] underline underline-offset-2"
+            @click="
+              mode = 'login';
+              error = '';
+              info = '';
+            "
+          >
+            Log in
+          </button>
+        </p>
+      </form>
+
+      <p class="mt-4 text-center text-[0.8rem] text-[#6b7460]">
         Testing accounts: <br />
-        <code>admin@example.com / admin123</code><br />
-        <code>buyer@example.com / buyer123</code>
+        <code
+          class="mt-1 inline-block rounded-[6px] border border-[#d4d0bf] bg-[#f3f0e6] px-2 py-1 text-[0.82rem]"
+        >
+          admin@example.com / admin123
+        </code>
+        <br />
+        <code
+          class="mt-1 inline-block rounded-[6px] border border-[#d4d0bf] bg-[#f3f0e6] px-2 py-1 text-[0.82rem]"
+        >
+          buyer@example.com / buyer123
+        </code>
       </p>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Wrapper (inside App.vue content area) */
-.login-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 28px 0 34px;
-}
-
-/* Card */
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  padding: 26px 26px 20px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #f6f3e8 0%, #edf4e8 100%);
-  border: 1px solid #dcd8c7;
-  box-shadow: 0 10px 20px rgba(180, 167, 140, 0.25);
-}
-
-/* Header */
-.card-header {
-  text-align: center;
-  margin-bottom: 1.4rem;
-}
-
-.logo-circle {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 0.8rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 2.3rem;
-  color: #2f3a2b;
-  box-shadow: 0 6px 18px rgba(143, 155, 132, 0.4);
-}
-
-h2 {
-  margin: 0;
-  font-size: 1.55rem;
-  color: #2f3a2b;
-  font-weight: 600;
-}
-
-.subtitle {
-  margin: 0.25rem 0 0;
-  color: #747c69;
-  font-size: 0.95rem;
-}
-
-/* Form */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.field label {
-  font-size: 0.85rem;
-  color: #4f5a43;
-}
-
-.field input {
-  padding: 0.58rem 0.7rem;
-  font-size: 0.95rem;
-  border-radius: 10px;
-  border: 1px solid #cfdcc3;
-  background: #fdfcf9;
-  color: #2f3a2b;
-  outline: none;
-  transition: border 0.15s ease, background 0.15s ease, box-shadow 0.2s ease;
-}
-
-.field input:focus {
-  border-color: #8ac79e;
-  background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(138, 199, 158, 0.35);
-}
-
-/* Error */
-.error {
-  color: #8b323a;
-  background: #ffe7e8;
-  border: 1px solid #f3c5c9;
-  padding: 0.5rem 0.6rem;
-  border-radius: 10px;
-  font-size: 0.86rem;
-  text-align: center;
-}
-
-/* Login button */
-.btn-login {
-  width: 100%;
-  padding: 0.7rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  color: #2f3a2b;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.btn-login:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(153, 169, 140, 0.4);
-}
-
-.btn-login:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-/* Hint text */
-.hint {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #6b7460;
-}
-
-.hint code {
-  background: #f3f0e6;
-  padding: 0.15rem 0.35rem;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  border: 1px solid #d4d0bf;
-}
-</style>

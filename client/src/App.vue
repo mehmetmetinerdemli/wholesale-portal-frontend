@@ -11,383 +11,234 @@ function handleLogout() {
 </script>
 
 <template>
-  <div class="app-shell">
-    <!-- Sidebar (only when logged in) -->
-    <aside v-if="isLoggedIn()" class="sidebar">
-      <div class="sidebar__brand">
-        <span class="brand-logo">🥦</span>
-        <div class="brand-text">
-          <h2>Wholesale Portal</h2>
-          <p>Orders &amp; Inventory</p>
+  <div
+    class="flex min-h-screen w-full text-[#2f3a2b] bg-[radial-gradient(circle_at_top_left,#f9f2e3_0%,#f2f6ee_45%,#fbeee5_100%)] font-sans"
+  >
+    <!-- Sidebar (only when logged in, hidden on small screens) -->
+    <aside
+      v-if="isLoggedIn()"
+      class="hidden md:flex w-60 flex-col gap-5 border-r border-[rgba(179,191,158,0.6)] bg-gradient-to-b from-[#f6f3e8] to-[#edf4e8] px-4 py-4 shadow-[4px_0_18px_rgba(133,146,115,0.18)]"
+    >
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-10 w-10 items-center justify-center rounded-full text-xl text-white bg-[radial-gradient(circle_at_30%_20%,#9fd39f_0,#7fb786_50%,#5d9466_100%)]"
+        >
+          🍅
+        </span>
+
+        <div class="space-y-0.5">
+          <h2 class="m-0 text-[15px] font-semibold text-[#333c2f]">
+            Wholesale Portal
+          </h2>
+          <p class="m-0 text-[11px] text-[#767f70]">
+            Orders &amp; Inventory
+          </p>
+
+          <!-- Buyer company name -->
+          <p
+            v-if="authState.user?.role === 'BUYER' && authState.user?.companyName"
+            class="inline-block mt-[6px] rounded-full bg-[rgba(172,201,163,0.38)] px-2.5 py-0.5 text-[11px] font-semibold text-[#3e5140]"
+          >
+            {{ authState.user.companyName }}
+          </p>
+
+          <!-- Admin badge -->
+          <p
+            v-else-if="authState.user?.role === 'ADMIN'"
+            class="inline-block mt-[6px] rounded-full bg-[rgba(241,190,160,0.45)] px-2.5 py-0.5 text-[11px] font-semibold text-[#6c3426]"
+          >
+            Admin Panel
+          </p>
         </div>
       </div>
 
-      <nav class="sidebar__nav">
-        <p class="nav-label">Buyer</p>
+      <!-- Navigation -->
+      <nav class="mt-2 flex flex-col gap-1.5">
+        <!-- Buyer section -->
+        <p
+          class="mx-1 mt-2 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8d947f]"
+        >
+          Buyer
+        </p>
 
         <RouterLink
           to="/buyer"
-          class="nav-link"
-          active-class="nav-link--active"
+          class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+          active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
         >
           Product Catalog
         </RouterLink>
 
         <RouterLink
           to="/buyer/orders"
-          class="nav-link"
-          active-class="nav-link--active"
+          class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+          active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
         >
           My Orders
         </RouterLink>
 
+        <!-- Promotions section -->
+        <p
+          class="mx-1 mt-4 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8d947f]"
+        >
+          Promotions
+        </p>
+
+        <RouterLink
+          to="/promotions/daily"
+          class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+          active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+        >
+          Daily Promotions
+        </RouterLink>
+
+        <RouterLink
+          to="/promotions/weekly"
+          class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+          active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+        >
+          Weekly Promotions
+        </RouterLink>
+
+        <RouterLink
+          to="/promotions/monthly"
+          class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+          active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+        >
+          Monthly Promotions
+        </RouterLink>
+
+        <!-- Admin section -->
         <template v-if="isAdmin()">
-          <p class="nav-label nav-label--spaced">Admin</p>
+          <p
+            class="mx-1 mt-4 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8d947f]"
+          >
+            Admin
+          </p>
 
           <RouterLink
             to="/admin"
-            class="nav-link"
-            active-class="nav-link--active"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
           >
             Admin Orders
           </RouterLink>
 
           <RouterLink
             to="/admin/products"
-            class="nav-link"
-            active-class="nav-link--active"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
           >
             Admin Products
           </RouterLink>
 
           <RouterLink
+            to="/admin/products/add"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+          >
+            Add Product
+          </RouterLink>
+
+          <RouterLink
             to="/admin/reports"
-            class="nav-link"
-            active-class="nav-link--active"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
           >
             Admin Reports
+          </RouterLink>
+
+          <RouterLink
+            to="/admin/promotions"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+          >
+            Admin Promotions
           </RouterLink>
         </template>
       </nav>
     </aside>
 
     <!-- Main area -->
-    <div class="app-main">
-      <header class="topbar">
-        <div class="topbar__left">
-          <h1>Wholesale Tracking Portal</h1>
-          <p class="subtitle">
+    <div class="flex flex-1 flex-col">
+      <!-- Topbar -->
+      <header
+        class="sticky top-0 z-10 flex items-center justify-between border-b border-[rgba(215,200,177,0.9)] bg-[rgba(252,245,233,0.96)] px-4 py-3 backdrop-blur-md md:px-7"
+      >
+        <div>
+          <h1 class="m-0 text-[18px] font-semibold text-[#313927]">
+            Wholesale Tracking Portal
+          </h1>
+          <p class="mt-[2px] text-[12px] text-[#7a806a]">
             Manage fresh produce orders, inventory &amp; reports.
           </p>
         </div>
 
-        <div class="topbar__right">
-          <!-- Show Login link when NOT logged in -->
+        <div class="flex items-center gap-3">
+          <!-- Show Login when NOT logged in -->
           <RouterLink
             v-if="!isLoggedIn()"
             to="/login"
-            class="btn btn-login"
-            active-class="btn-login--active"
+            class="rounded-full border border-[rgba(144,177,137,0.95)] bg-transparent px-3 py-1.5 text-[12px] text-[#3f5b41] transition hover:bg-gradient-to-r hover:from-[#f5c58a] hover:to-[#8ac79e] hover:text-[#263121] hover:shadow-[0_5px_14px_rgba(177,179,132,0.6)]"
+            active-class="bg-gradient-to-r from-[#f5c58a] to-[#8ac79e] text-[#263121] shadow-[0_5px_14px_rgba(177,179,132,0.6)]"
           >
             Login
           </RouterLink>
 
-          <!-- User info + Logout when logged in -->
-          <div v-else class="user-pill">
-            <div class="user-avatar">
+          <!-- User info when logged in -->
+          <div
+            v-else
+            class="flex items-center gap-2 rounded-full border border-[rgba(210,197,167,0.9)] bg-gradient-to-r from-[#fdf7ea] to-[#eef5eb] px-2.5 py-1.5 shadow-[0_4px_12px_rgba(156,151,118,0.3)]"
+          >
+            <!-- Avatar -->
+            <div
+              class="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-gradient-to-br from-[#f2b075] to-[#8ac79e] text-[14px] text-[#283124]"
+            >
               {{ authState.user?.name?.charAt(0)?.toUpperCase() ?? "U" }}
             </div>
-            <div class="user-meta">
-              <span class="user-name">
-                {{ authState.user?.name || "User" }}
+
+            <!-- Meta -->
+            <div class="mr-1 flex flex-col">
+              <span class="text-[12px] font-medium text-[#333c2f]">
+                {{ authState.user?.name }}
               </span>
-              <span class="user-role">
+
+              <!-- Company for buyers -->
+              <span
+                v-if="authState.user?.role === 'BUYER' && authState.user?.companyName"
+                class="-mt-0.5 text-[10px] text-[#65715e]"
+              >
+                {{ authState.user?.companyName }}
+              </span>
+
+              <!-- Role badge -->
+              <span
+                class="mt-[2px] inline-flex w-fit items-center justify-center rounded-full px-1.5 py-[2px] text-[10px] font-semibold uppercase tracking-[0.04em]"
+                :class="{
+                  'bg-[#f5b0b6] text-[#6f2330]': authState.user?.role === 'ADMIN',
+                  'bg-[#cbe8c9] text-[#2f3a2b]': authState.user?.role === 'BUYER'
+                }"
+              >
                 {{ authState.user?.role }}
               </span>
             </div>
-            <button class="btn btn-logout" @click="handleLogout">
+
+            <!-- Logout -->
+            <button
+              class="rounded-full border border-[#e6a3af] bg-[#f7c6cc] px-3.5 py-1.5 text-[12px] font-semibold text-[#5a2730] shadow-[0_3px_8px_rgba(214,132,145,0.45)] transition hover:-translate-y-[1px] hover:bg-[#f8d2d7] hover:shadow-[0_6px_14px_rgba(214,132,145,0.7)]"
+              @click="handleLogout"
+            >
               Logout
             </button>
           </div>
         </div>
       </header>
 
-      <main class="content">
+      <!-- Content -->
+      <main class="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-7">
         <RouterView />
       </main>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* ------------------------------
-   Overall layout + background
------------------------------- */
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  /* warm veggie-market background */
-  background: radial-gradient(
-      circle at top left,
-      #f9f2e3 0%,
-      #f2f6ee 45%,
-      #fbeee5 100%
-    );
-  color: #2f3a2b;
-}
-
-/* ------------------------------
-   Sidebar - soft sage / cream
------------------------------- */
-.sidebar {
-  width: 235px;
-  padding: 18px 16px;
-  background: linear-gradient(180deg, #f6f3e8 0%, #edf4e8 100%);
-  border-right: 1px solid rgba(179, 191, 158, 0.6);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 4px 0 18px rgba(133, 146, 115, 0.18);
-}
-
-.sidebar__brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-logo {
-  font-size: 26px;
-  background: radial-gradient(
-    circle at 30% 20%,
-    #9fd39f 0,
-    #7fb786 50%,
-    #5d9466 100%
-  );
-  color: #ffffff;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-text h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333c2f;
-}
-
-.brand-text p {
-  margin: 0;
-  font-size: 11px;
-  color: #767f70;
-}
-
-.sidebar__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.nav-label {
-  margin: 10px 4px 3px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #8d947f;
-}
-
-.nav-label--spaced {
-  margin-top: 16px;
-}
-
-.nav-link {
-  display: block;
-  padding: 7px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  text-decoration: none;
-  color: #435040;
-  background: transparent;
-  transition: background 0.16s ease, color 0.16s ease, transform 0.08s ease,
-    box-shadow 0.16s ease;
-}
-
-.nav-link:hover {
-  background: rgba(176, 205, 155, 0.35);
-  transform: translateX(2px);
-  box-shadow: 0 4px 10px rgba(139, 164, 117, 0.4);
-}
-
-/* active: carrot + herb gradient */
-.nav-link--active {
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  color: #263121;
-  box-shadow: 0 8px 16px rgba(191, 170, 123, 0.55);
-}
-
-/* ------------------------------
-   Main area
------------------------------- */
-.app-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ------------------------------
-   Topbar - warm light bar
------------------------------- */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 28px;
-  border-bottom: 1px solid rgba(215, 200, 177, 0.9);
-  background: rgba(252, 245, 233, 0.96);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.topbar__left h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #313927;
-}
-
-.subtitle {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: #7a806a;
-}
-
-/* right side */
-.topbar__right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ------------------------------
-   User pill
------------------------------- */
-.user-pill {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 4px 7px 4px 4px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #fdf7ea 0%, #eef5eb 100%);
-  border: 1px solid rgba(210, 197, 167, 0.9);
-  box-shadow: 0 4px 12px rgba(156, 151, 118, 0.3);
-}
-
-.user-avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  color: #283124;
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-  margin-right: 4px;
-}
-
-.user-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: #333c2f;
-}
-
-.user-role {
-  font-size: 11px;
-  color: #777e6c;
-}
-
-/* ------------------------------
-   Buttons
------------------------------- */
-.btn {
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 6px 12px;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease,
-    color 0.15s ease;
-}
-
-/* login: herb outline */
-.btn-login {
-  background: transparent;
-  color: #3f5b41;
-  border: 1px solid rgba(144, 177, 137, 0.95);
-}
-
-.btn-login--active,
-.btn-login:hover {
-  background: linear-gradient(135deg, #f5c58a, #8ac79e);
-  color: #263121;
-  box-shadow: 0 5px 14px rgba(177, 179, 132, 0.6);
-}
-
-/* logout: beet / tomato */
-.btn-logout {
-  background: #f5b0b6;
-  color: #6f2330;
-  border: 1px solid rgba(238, 163, 172, 0.95);
-}
-
-.btn-logout:hover {
-  background: #f398a1;
-  transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(214, 132, 145, 0.55);
-}
-
-/* ------------------------------
-   Content area
------------------------------- */
-.content {
-  padding: 24px 32px 32px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-/* ------------------------------
-   Responsive
------------------------------- */
-@media (max-width: 900px) {
-  .sidebar {
-    display: none;
-  }
-
-  .topbar {
-    padding-inline: 16px;
-  }
-
-  .content {
-    padding-inline: 16px;
-    max-width: 100%;
-  }
-}
-</style>

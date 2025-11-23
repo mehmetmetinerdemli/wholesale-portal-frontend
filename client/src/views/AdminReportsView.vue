@@ -65,7 +65,7 @@ function initChartDefaults() {
       categories: [],
       labels: {
         style: { colors: "#d5d2f3", fontSize: "11px" },
-        rotate: -90,          // vertical labels
+        rotate: -90, // vertical labels
         trim: false,
         hideOverlappingLabels: false,
       },
@@ -274,48 +274,83 @@ async function loadDailySummary() {
 </script>
 
 <template>
-  <div class="reports-page">
-    <!-- HEADER: same style as Admin – Products -->
-    <header class="reports-header">
-      <div class="title-wrap">
-        <div class="icon-badge">📊</div>
+  <div class="flex flex-col gap-4">
+    <!-- HEADER -->
+    <header
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_20%_20%,#9ef5d5,#3e7b6f)] text-[1.7rem]"
+        >
+          📊
+        </div>
         <div>
-          <h2>Admin – Reports</h2>
-          <p class="subtitle">
+          <h2 class="m-0 text-[1.7rem] font-bold text-[#1b1825]">
+            Admin – Reports
+          </h2>
+          <p class="m-0 mt-[0.2rem] text-[0.95rem] text-[#6c6882]">
             Insights: top-selling products, low inventory alerts, and daily revenue.
           </p>
         </div>
       </div>
     </header>
 
-    <section class="grid">
+    <!-- GRID -->
+    <section class="grid gap-6 md:grid-cols-2">
       <!-- TOP PRODUCTS -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Top products</h3>
-          <div class="controls">
-            <label>
-              Days:
+      <div
+        class="min-w-0 rounded-[22px] border border-[#4a445c] bg-[radial-gradient(circle_at_top,#352d45_0%,#2b2636_55%,#262130_100%)] px-5 py-4 text-[#f5f3ff] shadow-[0_14px_32px_rgba(34,26,46,0.45)]"
+      >
+        <div class="mb-3 flex items-center justify-between gap-2">
+          <h3 class="m-0 text-[1.05rem] text-[#f6f3ff]">
+            Top products
+          </h3>
+          <div
+            class="flex flex-wrap items-center gap-2 text-[0.85rem] text-[#d4d2eb]"
+          >
+            <label class="flex items-center gap-1">
+              <span>Days:</span>
               <input
                 type="number"
                 v-model.number="topDays"
                 min="1"
                 max="365"
                 @change="loadTopProducts"
+                class="w-[70px] rounded-[8px] border border-[#5c566c] bg-[#2e2938] px-[0.45rem] py-[0.3rem] text-[0.85rem] text-[#f5f3ff] outline-none focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.35)]"
               />
             </label>
-            <button class="small-btn" @click="loadTopProducts" :disabled="loadingTop">
+            <button
+              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
+              @click="loadTopProducts"
+              :disabled="loadingTop"
+            >
               {{ loadingTop ? "Loading…" : "Refresh" }}
             </button>
           </div>
         </div>
 
-        <div v-if="topError" class="error">Error: {{ topError }}</div>
-        <div v-else-if="loadingTop" class="info">Loading top products…</div>
+        <div
+          v-if="topError"
+          class="mb-2 rounded-[10px] border border-[#e8a1b0] bg-[#ffe6eb] px-[0.6rem] py-[0.45rem] text-[0.86rem] text-[#6d2635]"
+        >
+          Error: {{ topError }}
+        </div>
+        <div
+          v-else-if="loadingTop"
+          class="py-2 text-[0.9rem] text-[#bfbce5]"
+        >
+          Loading top products…
+        </div>
 
         <div v-else>
-          <div v-if="topProducts.length" class="charts-row">
-            <div class="chart-wrapper">
+          <div
+            v-if="topProducts.length"
+            class="mb-[0.9rem] grid gap-[0.9rem] md:grid-cols-2"
+          >
+            <div
+              class="w-full rounded-[14px] border border-[#4f4965] bg-[#241f30] p-[0.4rem]"
+            >
               <apexchart
                 type="bar"
                 height="260"
@@ -323,7 +358,9 @@ async function loadDailySummary() {
                 :series="topBarSeries"
               />
             </div>
-            <div class="chart-wrapper">
+            <div
+              class="w-full rounded-[14px] border border-[#4f4965] bg-[#241f30] p-[0.4rem]"
+            >
               <apexchart
                 type="pie"
                 height="260"
@@ -333,54 +370,114 @@ async function loadDailySummary() {
             </div>
           </div>
 
-          <table v-if="topProducts.length" class="report-table">
+          <table
+            v-if="topProducts.length"
+            class="w-full border-collapse text-[0.88rem] text-[#f5f3ff]"
+          >
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Product</th>
-                <th>Qty sold</th>
-                <th>Revenue (€)</th>
+              <tr class="bg-[rgba(24,21,34,0.85)]">
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  #
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Product
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Qty sold
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Revenue (€)
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(p, idx) in topProducts" :key="p.productId">
-                <td>{{ idx + 1 }}</td>
-                <td>{{ p.name }}</td>
-                <td>{{ p.totalQty }}</td>
-                <td>€ {{ p.totalRevenue.toFixed(2) }}</td>
+              <tr
+                v-for="(p, idx) in topProducts"
+                :key="p.productId"
+                class="bg-[#2d2838] even:bg-[#332d41] hover:bg-[#3a334a] transition-colors"
+              >
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ idx + 1 }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.name }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.totalQty }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  € {{ p.totalRevenue.toFixed(2) }}
+                </td>
               </tr>
             </tbody>
           </table>
 
-          <p v-else class="info small">No product sales in the selected period.</p>
+          <p
+            v-else
+            class="py-2 text-[0.85rem] text-[#a8a5c9]"
+          >
+            No product sales in the selected period.
+          </p>
         </div>
       </div>
 
       <!-- LOW STOCK -->
-      <div class="card">
-        <div class="card-header">
-          <h3>Low stock</h3>
-          <div class="controls">
-            <label>
-              Threshold:
+      <div
+        class="min-w-0 rounded-[22px] border border-[#4a445c] bg-[radial-gradient(circle_at_top,#352d45_0%,#2b2636_55%,#262130_100%)] px-5 py-4 text-[#f5f3ff] shadow-[0_14px_32px_rgba(34,26,46,0.45)]"
+      >
+        <div class="mb-3 flex items-center justify-between gap-2">
+          <h3 class="m-0 text-[1.05rem] text-[#f6f3ff]">
+            Low stock
+          </h3>
+          <div
+            class="flex flex-wrap items-center gap-2 text-[0.85rem] text-[#d4d2eb]"
+          >
+            <label class="flex items-center gap-1">
+              <span>Threshold:</span>
               <input
                 type="number"
                 v-model.number="lowThreshold"
                 min="0"
                 @change="loadLowStock"
+                class="w-[70px] rounded-[8px] border border-[#5c566c] bg-[#2e2938] px-[0.45rem] py-[0.3rem] text-[0.85rem] text-[#f5f3ff] outline-none focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.35)]"
               />
             </label>
-            <button class="small-btn" @click="loadLowStock" :disabled="loadingLow">
+            <button
+              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
+              @click="loadLowStock"
+              :disabled="loadingLow"
+            >
               {{ loadingLow ? "Loading…" : "Refresh" }}
             </button>
           </div>
         </div>
 
-        <div v-if="lowError" class="error">Error: {{ lowError }}</div>
-        <div v-else-if="loadingLow" class="info">Loading low stock…</div>
+        <div
+          v-if="lowError"
+          class="mb-2 rounded-[10px] border border-[#e8a1b0] bg-[#ffe6eb] px-[0.6rem] py-[0.45rem] text-[0.86rem] text-[#6d2635]"
+        >
+          Error: {{ lowError }}
+        </div>
+        <div
+          v-else-if="loadingLow"
+          class="py-2 text-[0.9rem] text-[#bfbce5]"
+        >
+          Loading low stock…
+        </div>
 
         <div v-else>
-          <div v-if="lowStock.length" class="chart-wrapper chart-wrapper--wide">
+          <div
+            v-if="lowStock.length"
+            class="mb-[0.9rem] w-full rounded-[14px] border border-[#4f4965] bg-[#241f30] p-[0.4rem]"
+          >
             <apexchart
               type="bar"
               height="260"
@@ -389,48 +486,89 @@ async function loadDailySummary() {
             />
           </div>
 
-          <table v-if="lowStock.length" class="report-table">
+          <table
+            v-if="lowStock.length"
+            class="w-full border-collapse text-[0.88rem] text-[#f5f3ff]"
+          >
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Product</th>
-                <th>Stock</th>
-                <th>Unit</th>
+              <tr class="bg-[rgba(24,21,34,0.85)]">
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  ID
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Product
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Stock
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Unit
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in lowStock" :key="p.id">
-                <td>{{ p.id }}</td>
-                <td>{{ p.name }}</td>
-                <td>{{ p.stockQty }}</td>
-                <td>{{ p.unit }}</td>
+              <tr
+                v-for="p in lowStock"
+                :key="p.id"
+                class="bg-[#2d2838] even:bg-[#332d41] hover:bg-[#3a334a] transition-colors"
+              >
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.id }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.name }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.stockQty }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ p.unit }}
+                </td>
               </tr>
             </tbody>
           </table>
 
-          <p v-else class="info small">
+          <p
+            v-else
+            class="py-2 text-[0.85rem] text-[#a8a5c9]"
+          >
             No products below the threshold.
           </p>
         </div>
       </div>
 
       <!-- DAILY SUMMARY -->
-      <div class="card full-width">
-        <div class="card-header">
-          <h3>Daily summary</h3>
-          <div class="controls">
-            <label>
-              Days:
+      <div
+        class="min-w-0 rounded-[22px] border border-[#4a445c] bg-[radial-gradient(circle_at_top,#352d45_0%,#2b2636_55%,#262130_100%)] px-5 py-4 text-[#f5f3ff] shadow-[0_14px_32px_rgba(34,26,46,0.45)] md:col-span-2"
+      >
+        <div class="mb-3 flex items-center justify-between gap-2">
+          <h3 class="m-0 text-[1.05rem] text-[#f6f3ff]">
+            Daily summary
+          </h3>
+          <div
+            class="flex flex-wrap items-center gap-2 text-[0.85rem] text-[#d4d2eb]"
+          >
+            <label class="flex items-center gap-1">
+              <span>Days:</span>
               <input
                 type="number"
                 v-model.number="summaryDays"
                 min="1"
                 max="365"
                 @change="loadDailySummary"
+                class="w-[70px] rounded-[8px] border border-[#5c566c] bg-[#2e2938] px-[0.45rem] py-[0.3rem] text-[0.85rem] text-[#f5f3ff] outline-none focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.35)]"
               />
             </label>
             <button
-              class="small-btn"
+              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
               @click="loadDailySummary"
               :disabled="loadingDaily"
             >
@@ -439,11 +577,24 @@ async function loadDailySummary() {
           </div>
         </div>
 
-        <div v-if="dailyError" class="error">Error: {{ dailyError }}</div>
-        <div v-else-if="loadingDaily" class="info">Loading daily summary…</div>
+        <div
+          v-if="dailyError"
+          class="mb-2 rounded-[10px] border border-[#e8a1b0] bg-[#ffe6eb] px-[0.6rem] py-[0.45rem] text-[0.86rem] text-[#6d2635]"
+        >
+          Error: {{ dailyError }}
+        </div>
+        <div
+          v-else-if="loadingDaily"
+          class="py-2 text-[0.9rem] text-[#bfbce5]"
+        >
+          Loading daily summary…
+        </div>
 
         <div v-else>
-          <div v-if="dailySummary.length" class="chart-wrapper chart-wrapper--wide">
+          <div
+            v-if="dailySummary.length"
+            class="mb-[0.9rem] w-full rounded-[14px] border border-[#4f4965] bg-[#241f30] p-[0.4rem]"
+          >
             <apexchart
               type="line"
               height="260"
@@ -452,264 +603,56 @@ async function loadDailySummary() {
             />
           </div>
 
-          <table v-if="dailySummary.length" class="report-table">
+          <table
+            v-if="dailySummary.length"
+            class="w-full border-collapse text-[0.88rem] text-[#f5f3ff]"
+          >
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Orders</th>
-                <th>Revenue (€)</th>
+              <tr class="bg-[rgba(24,21,34,0.85)]">
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Date
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Orders
+                </th>
+                <th
+                  class="border-b border-[#49435b] px-[0.6rem] py-[0.55rem] text-left text-[0.78rem] font-semibold uppercase tracking-[0.07em] text-[#bcb6da]"
+                >
+                  Revenue (€)
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in dailySummary" :key="row.day">
-                <td>{{ formatDate(row.day) }}</td>
-                <td>{{ row.orderCount }}</td>
-                <td>€ {{ row.totalRevenue.toFixed(2) }}</td>
+              <tr
+                v-for="row in dailySummary"
+                :key="row.day"
+                class="bg-[#2d2838] even:bg-[#332d41] hover:bg-[#3a334a] transition-colors"
+              >
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ formatDate(row.day) }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  {{ row.orderCount }}
+                </td>
+                <td class="border-b border-[#3e394d] px-[0.6rem] py-[0.5rem]">
+                  € {{ row.totalRevenue.toFixed(2) }}
+                </td>
               </tr>
             </tbody>
           </table>
 
-          <p v-else class="info small">No orders in the selected period.</p>
+          <p
+            v-else
+            class="py-2 text-[0.85rem] text-[#a8a5c9]"
+          >
+            No orders in the selected period.
+          </p>
         </div>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.reports-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* HEADER – same vibe as Admin Products */
-.reports-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.icon-badge {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: radial-gradient(circle at 20% 20%, #9ef5d5, #3e7b6f);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.7rem;
-}
-
-.reports-header h2 {
-  margin: 0;
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: #1b1825;
-}
-
-.subtitle {
-  margin: 0.2rem 0 0;
-  font-size: 0.95rem;
-  color: #6c6882;
-}
-
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.4rem;
-}
-
-.card.full-width {
-  grid-column: 1 / -1;
-}
-
-/* CARD */
-.card {
-  background: radial-gradient(circle at top, #352d45 0%, #2b2636 55%, #262130 100%);
-  border-radius: 22px;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid #4a445c;
-  box-shadow: 0 14px 32px rgba(34, 26, 46, 0.45);
-  color: #f5f3ff;
-  min-width: 0;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.8rem;
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: 1.05rem;
-  color: #f6f3ff;
-}
-
-/* CONTROLS */
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #d4d2eb;
-}
-
-.controls label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.controls input {
-  width: 70px;
-  padding: 0.3rem 0.45rem;
-  border-radius: 8px;
-  background: #2e2938;
-  border: 1px solid #5c566c;
-  color: #f5f3ff;
-  outline: none;
-  font-size: 0.85rem;
-}
-
-.controls input:focus {
-  border-color: #8ccf9a;
-  box-shadow: 0 0 0 1px rgba(140, 207, 154, 0.35);
-}
-
-/* BUTTON */
-.small-btn {
-  padding: 0.28rem 0.6rem;
-  font-size: 0.78rem;
-  cursor: pointer;
-  border-radius: 10px;
-  border: none;
-  color: #262130;
-  background: linear-gradient(120deg, #a8f0ad, #87d4ff);
-  font-weight: 500;
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.small-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(152, 235, 195, 0.4);
-}
-
-.small-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* CHARTS */
-.charts-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin-bottom: 0.9rem;
-}
-
-.chart-wrapper,
-.chart-wrapper--wide {
-  background: #241f30;
-  border-radius: 14px;
-  padding: 0.4rem;
-  border: 1px solid #4f4965;
-  min-width: 0;
-}
-
-.chart-wrapper--wide {
-  margin-bottom: 0.9rem;
-}
-
-/* APEX width */
-:deep(.apexcharts-canvas) {
-  width: 100% !important;
-}
-
-/* TABLES */
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-  color: #f5f3ff;
-}
-
-.report-table thead tr {
-  background: rgba(24, 21, 34, 0.85);
-}
-
-.report-table th {
-  font-weight: 600;
-  padding: 0.55rem 0.6rem;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #bcb6da;
-  border-bottom: 1px solid #49435b;
-}
-
-.report-table td {
-  padding: 0.5rem 0.6rem;
-  border-bottom: 1px solid #3e394d;
-}
-
-.report-table tbody tr {
-  background: #2d2838;
-}
-
-.report-table tbody tr:nth-child(even) {
-  background: #332d41;
-}
-
-.report-table tbody tr:hover {
-  background: #3a334a;
-}
-
-/* MESSAGES */
-.info {
-  padding: 0.5rem 0;
-  color: #bfbce5;
-}
-
-.info.small {
-  font-size: 0.85rem;
-  color: #a8a5c9;
-}
-
-.error {
-  background: #ffe6eb;
-  border: 1px solid #e8a1b0;
-  color: #6d2635;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.86rem;
-  border-radius: 10px;
-  margin-bottom: 0.6rem;
-}
-
-/* RESPONSIVE */
-@media (max-width: 1200px) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .charts-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-</style>

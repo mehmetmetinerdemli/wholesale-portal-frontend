@@ -1,6 +1,13 @@
 /* -------------------------------------------
    GLOBAL ROOT VARIABLES
 -------------------------------------------- */
+
+@import "tailwindcss";
+
+/* your existing styles can stay below this */
+
+
+
 :root {
   --bg-main: #0c0c11;
   --text-main: #f6f6ff;

@@ -25,7 +25,6 @@ let cutoffIntervalId = null;
 const CUTOFF_HOUR = 16;
 const CUTOFF_MINUTE = 0;
 
-// helpers
 const pad = (n) => n.toString().padStart(2, "0");
 
 function computeTodayDate() {
@@ -37,7 +36,6 @@ function computeTodayDate() {
 }
 
 function isProductActive(product) {
-  // handle different possible field names, default true
   if (typeof product.isActive !== "undefined") return !!product.isActive;
   if (typeof product.is_active !== "undefined") return !!product.is_active;
   return true;
@@ -64,13 +62,11 @@ function canAdd(product) {
   return true;
 }
 
-// lifecycle
 onMounted(async () => {
   deliveryMinDate.value = computeTodayDate();
 
   await loadProducts();
 
-  // if there is a reorder pending, prefill cart
   const itemsToReorder = consumeReorderItems();
   if (itemsToReorder && itemsToReorder.length > 0) {
     cartItems.value = itemsToReorder.map((item) => ({
@@ -167,7 +163,6 @@ function addToCart(product) {
   const alreadyInCart = existing ? existing.quantity : 0;
   const totalRequested = alreadyInCart + qty;
 
-  // 🔴 FRONTEND CHECK: don't exceed current stock
   if (totalRequested > product.stockQty) {
     alert(
       `Not enough stock for "${product.name}". You already have ${alreadyInCart} in the cart and you tried to add ${qty}. Available: ${product.stockQty}.`
@@ -248,14 +243,11 @@ async function submitOrder() {
       return;
     }
 
-    // SUCCESS
     orderMessage.value = `Order #${result.id} created successfully. Status: ${
       result.status
     }, total: € ${result.totalAmount.toFixed(2)}`;
 
     cartItems.value = [];
-
-    // 🔄 reload products so stock values update on screen
     await loadProducts();
   } catch (err) {
     console.error(err);
@@ -267,166 +259,120 @@ async function submitOrder() {
 </script>
 
 <template>
-  <div class="buyer-page">
-    <header class="buyer-header">
+  <div class="flex flex-col gap-4">
+    <!-- HEADER -->
+    <header class="flex flex-col justify-between gap-3 md:flex-row md:items-start">
       <div>
-        <h2>Buyer – Create Order 🧺</h2>
-        <p class="subtitle">
+        <h2 class="m-0 mb-1 text-[1.45rem] font-semibold text-[#2f3a2b]">
+          Buyer – Create Order 🧺
+        </h2>
+        <p class="m-0 text-[0.95rem] text-[#6f7569]">
           Select fresh products, build your order and choose your delivery date.
         </p>
       </div>
 
-      <div class="chips-row">
-        <span class="chip chip-green">🥬 Live stock</span>
-        <span class="chip chip-orange">🥕 Next-day delivery (before cut-off)</span>
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <span
+          class="inline-flex items-center gap-1 rounded-full border border-[#c0e2bc] bg-[#e3f3df] px-2.5 py-[0.15rem] text-[0.75rem] text-[#356b3a]"
+        >
+          🥬 Live stock
+        </span>
+        <span
+          class="inline-flex items-center gap-1 rounded-full border border-[#f6c894] bg-[#fff2de] px-2.5 py-[0.15rem] text-[0.75rem] text-[#8a5b1f]"
+        >
+          🥕 Next-day delivery (before cut-off)
+        </span>
       </div>
     </header>
 
+    <!-- CUTOFF BANNER -->
     <div
-      class="cutoff-banner"
-      :class="{ passed: cutoffPassed }"
       v-if="cutoffInfo"
+      class="flex items-center gap-2 rounded-xl border px-3 py-2 text-[0.9rem]"
+      :class="cutoffPassed
+        ? 'border-[#f6b8c2] bg-[#ffe5e9] text-[#a5394a]'
+        : 'border-[#f6c894] bg-[#fff2de] text-[#7a5a1c]'"
     >
-      <span class="cutoff-icon">⏰</span>
+      <span class="text-[1.1rem]">⏰</span>
       <span>{{ cutoffInfo }}</span>
     </div>
 
-    <section class="layout">
-      <!-- Products -->
-      <div class="column column--products">
-        <header class="column-header">
-          <div>
-            <h3>Available Products</h3>
-            <p class="column-subtitle">
-              Browse today’s catalog and add quantities to your order.
-            </p>
-          </div>
+    <!-- LAYOUT -->
+    <section
+      class="grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] items-start"
+    >
+      <!-- CREATE ORDER PANEL (TOP / LEFT) -->
+      <div
+        class="order-1 flex flex-col rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] px-4 py-4 shadow-[0_10px_24px_rgba(149,170,131,0.30)] md:order-none"
+      >
+        <header class="mb-3 flex flex-col gap-1">
+          <h3 class="m-0 text-[1.05rem] font-semibold text-[#2f3a2b]">
+            Create Order
+          </h3>
+          <p class="m-0 text-[0.85rem] text-[#6f7569]">
+            Review your cart, choose a delivery date and submit your order.
+          </p>
         </header>
 
-        <div v-if="loading" class="info">Loading products…</div>
-        <div v-else-if="error" class="error">Error: {{ error }}</div>
-
-        <div v-else class="products-grid">
-          <article
-            v-for="product in products"
-            :key="product.id"
-            class="product-card"
-          >
-            <header class="product-card__header">
-              <div>
-                <h4>{{ product.name }}</h4>
-                <div class="pill-row">
-                  <span v-if="product.grade" class="pill">
-                    {{ product.grade }}
-                  </span>
-                  <span v-if="product.origin" class="pill pill-soft">
-                    {{ product.origin }}
-                  </span>
-                </div>
-              </div>
-              <span class="badge">{{ product.unit }}</span>
-            </header>
-
-            <div class="product-card__price">
-              <span class="price">€ {{ product.price.toFixed(2) }}</span>
-              <span class="price-unit"> / {{ product.unit }}</span>
-            </div>
-
-            <div class="product-card__stock">
-              <span class="stock-dot" :class="stockClass(product)">
-                ●
-              </span>
-              <span class="stock-text">
-                {{ stockText(product) }}
-              </span>
-            </div>
-
-            <div class="product-card__actions">
-              <input
-                v-model.number="product.quantityToOrder"
-                type="number"
-                min="0"
-                :max="product.stockQty"
-                class="qty-input"
-                placeholder="Qty"
-              />
-
-              <button
-                class="btn btn-add"
-                :disabled="!canAdd(product)"
-                @click="addToCart(product)"
-              >
-                Add
-              </button>
-            </div>
-
-            <p v-if="!isProductActive(product)" class="hint danger">
-              This product is currently unavailable.
-            </p>
-            <p v-else-if="product.stockQty === 0" class="hint danger">
-              Out of stock.
-            </p>
-            <p v-else-if="product.stockQty < 5" class="hint warning">
-              Limited stock – order soon.
-            </p>
-          </article>
-        </div>
-      </div>
-
-      <!-- Order panel -->
-      <div class="column column--order">
-        <header class="column-header">
-          <div>
-            <h3>Create Order</h3>
-            <p class="column-subtitle">
-              Review your cart, choose a delivery date and submit your order.
-            </p>
-          </div>
-        </header>
-
-        <div class="field">
-          <label>Buyer name</label>
+        <!-- BUYER NAME -->
+        <div class="mb-3 flex flex-col gap-1">
+          <label class="text-[0.8rem] text-[#4f5a43]">Buyer name</label>
           <input
             v-model="buyerName"
             type="text"
             disabled
             :placeholder="authState.user?.name || 'Logged-in buyer'"
+            class="w-full rounded-lg border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.88rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
           />
         </div>
 
-        <div class="field">
-          <label for="deliveryDate">Delivery date</label>
+        <!-- DELIVERY DATE -->
+        <div class="mb-3 flex flex-col gap-1">
+          <label for="deliveryDate" class="text-[0.8rem] text-[#4f5a43]"
+            >Delivery date</label
+          >
           <input
             id="deliveryDate"
             v-model="deliveryDate"
             type="date"
             :min="deliveryMinDate"
+            class="w-full rounded-lg border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.88rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
           />
         </div>
 
-        <h4 class="order-items-title">Order items</h4>
-        <p v-if="cartItems.length === 0" class="info small">
-          No items in the order yet. Add some from the product list on the left.
+        <!-- CART ITEMS -->
+        <h4 class="mt-1 mb-2 text-[0.96rem] font-semibold text-[#2f3a2b]">
+          Order items
+        </h4>
+
+        <p v-if="cartItems.length === 0" class="text-[0.8rem] text-[#8a8f84]">
+          No items in the order yet. Add some from the product list.
         </p>
 
-        <div v-else class="cart-list">
+        <div
+          v-else
+          class="mb-2 flex max-h-64 flex-col gap-2 overflow-y-auto"
+        >
           <div
             v-for="item in cartItems"
             :key="item.productId"
-            class="cart-row"
+            class="flex justify-between gap-3 rounded-xl bg-[#edf4e8] px-3 py-2"
           >
-            <div class="cart-row__info">
-              <h5>{{ item.name }}</h5>
-              <p class="cart-meta">
+            <div>
+              <h5 class="m-0 mb-[2px] text-[0.9rem] font-medium text-[#2f3a2b]">
+                {{ item.name }}
+              </h5>
+              <p class="m-0 text-[0.8rem] text-[#6f7569]">
                 {{ item.quantity }} × € {{ item.unitPrice.toFixed(2) }}
               </p>
             </div>
-            <div class="cart-row__total">
-              <span class="cart-total-line">
+
+            <div class="flex flex-col items-end gap-1">
+              <span class="text-[0.86rem] text-[#2f3a2b]">
                 € {{ (item.unitPrice * item.quantity).toFixed(2) }}
               </span>
               <button
-                class="link-btn"
+                class="cursor-pointer text-[0.78rem] text-[#c73f5b] underline"
                 @click="removeFromCart(item.productId)"
               >
                 remove
@@ -435,480 +381,187 @@ async function submitOrder() {
           </div>
         </div>
 
-        <div class="total-row" v-if="cartItems.length > 0">
+        <!-- TOTAL -->
+        <div
+          v-if="cartItems.length > 0"
+          class="mt-1 flex items-center justify-between text-[0.92rem] text-[#2f3a2b]"
+        >
           <span>Total:</span>
           <strong>€ {{ cartTotal().toFixed(2) }}</strong>
         </div>
 
-        <div v-if="orderError" class="error">{{ orderError }}</div>
-        <div v-if="orderMessage" class="success">{{ orderMessage }}</div>
-
-        <button
-          class="primary-btn"
-          :disabled="orderSubmitting || cartItems.length === 0"
-          @click="submitOrder"
+        <!-- MESSAGES -->
+        <div
+          v-if="orderError"
+          class="mt-2 rounded-xl border border-[#f6b8c2] bg-[#ffe5e9] px-3 py-2 text-[0.85rem] text-[#b3343f]"
         >
-          {{ orderSubmitting ? "Placing order..." : "Place order" }}
-        </button>
+          {{ orderError }}
+        </div>
+
+        <div
+          v-if="orderMessage"
+          class="mt-2 rounded-xl border border-[#c0e2bc] bg-[#e3f3df] px-3 py-2 text-[0.85rem] text-[#356b3a]"
+        >
+          {{ orderMessage }}
+        </div>
+
+        <!-- PLACE ORDER BUTTON (same style family as create promotion) -->
+        <button
+  class="cursor-pointer rounded-full px-4 py-[0.55rem] text-[0.96rem] font-semibold
+         bg-[linear-gradient(135deg,#d98968,#d25564)] text-[#3a1c1f]
+         border border-[#f1737e]
+         shadow-[0_10px_20px_rgba(210,85,100,0.55)]
+         transition-all duration-150 ease-out
+         hover:-translate-y-[1px] hover:shadow-[0_14px_26px_rgba(210,85,100,0.75)]
+         disabled:cursor-default disabled:opacity-60 disabled:shadow-none w-full mt-3"
+  :disabled="orderSubmitting || cartItems.length === 0"
+  @click="submitOrder"
+>
+  {{ orderSubmitting ? "Placing order..." : "Place order" }}
+</button>
+
+      </div>
+
+      <!-- PRODUCTS LIST -->
+      <div
+        class="rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] px-4 py-4 shadow-[0_10px_24px_rgba(149,170,131,0.30)]"
+      >
+        <header class="mb-3 flex items-start justify-between gap-2">
+          <div>
+            <h3 class="m-0 text-[1.08rem] font-semibold text-[#2f3a2b]">
+              Available Products
+            </h3>
+            <p class="m-0 mt-[2px] text-[0.85rem] text-[#6f7569]">
+              Browse today’s catalog and add quantities to your order.
+            </p>
+          </div>
+        </header>
+
+        <div v-if="loading" class="text-[0.86rem] text-[#5c6157]">
+          Loading products…
+        </div>
+        <div
+          v-else-if="error"
+          class="mt-2 rounded-xl border border-[#f6b8c2] bg-[#ffe5e9] px-3 py-2 text-[0.85rem] text-[#b3343f]"
+        >
+          Error: {{ error }}
+        </div>
+
+        <div
+          v-else
+          class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          <article
+            v-for="product in products"
+            :key="product.id"
+            class="flex flex-col gap-2 rounded-2xl border border-[#d7e4c7] bg-[#f8fbf4] px-3.5 py-3 text-[0.9rem] shadow-[0_6px_14px_rgba(149,170,131,0.25)] transition-all duration-150 hover:-translate-y-[2px] hover:border-[#c3d7ae] hover:bg-[#f3f8ec] hover:shadow-[0_10px_18px_rgba(149,170,131,0.40)]"
+          >
+            <!-- HEADER with KG badge, no weird empty space -->
+            <header
+              class="flex items-start justify-between gap-2"
+            >
+              <div class="flex flex-col">
+                <h4
+                  class="m-0 mb-[3px] text-[0.98rem] font-semibold text-[#2f3a2b]"
+                >
+                  {{ product.name }}
+                </h4>
+
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-if="product.grade"
+                    class="rounded-full bg-[#f1e4ff] px-2 py-[2px] text-[0.7rem] text-[#5d3a7a]"
+                  >
+                    {{ product.grade }}
+                  </span>
+                  <span
+                    v-if="product.origin"
+                    class="rounded-full bg-[#f7ebde] px-2 py-[2px] text-[0.7rem] text-[#7a5a36]"
+                  >
+                    {{ product.origin }}
+                  </span>
+                </div>
+              </div>
+
+              <span
+                class="inline-flex items-center justify-center rounded-full border border-[#d4ddc9] bg-[#edf4e8] px-3 py-1 text-[0.75rem] text-[#4e5b45]"
+              >
+                {{ product.unit }}
+              </span>
+            </header>
+
+            <!-- PRICE -->
+            <div class="mt-[2px] text-[0.92rem]">
+              <span class="font-semibold text-[#2f3a2b]">
+                € {{ product.price.toFixed(2) }}
+              </span>
+              <span class="text-[#6f7569]"> / {{ product.unit }}</span>
+            </div>
+
+            <!-- STOCK -->
+            <div class="flex items-center gap-1 text-[0.8rem] text-[#5f6559]">
+              <span
+                class="text-[0.85rem]"
+                :class="{
+                  'text-[#4caf6f]': stockClass(product) === 'success',
+                  'text-[#f2b546]': stockClass(product) === 'warning',
+                  'text-[#e45d79]': stockClass(product) === 'danger'
+                }"
+              >
+                ●
+              </span>
+              <span>{{ stockText(product) }}</span>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="mt-1 flex items-center gap-2">
+              <input
+                v-model.number="product.quantityToOrder"
+                type="number"
+                min="0"
+                :max="product.stockQty"
+                placeholder="Qty"
+                class="w-[80px] rounded-xl border border-[#cfdcc3] bg-[#fdfcf9] px-2 py-2 text-[0.8rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
+              />
+
+              <!-- ADD BUTTON – SAME STYLE AS REORDER -->
+              <button
+                class="cursor-pointer rounded-full px-4 py-[0.45rem] text-[0.88rem] font-semibold
+                       bg-[linear-gradient(135deg,#d98968,#d25564)] text-[#3a1c1f]
+                       border border-[#f1737e]
+                       shadow-[0_10px_20px_rgba(210,85,100,0.55)]
+                       transition-all duration-150 ease-out
+                       hover:-translate-y-[1px] hover:shadow-[0_14px_26px_rgba(210,85,100,0.75)]
+                       disabled:cursor-default disabled:opacity-60 disabled:shadow-none"
+                :disabled="!canAdd(product)"
+                @click="addToCart(product)"
+              >
+                Add
+              </button>
+            </div>
+
+            <!-- HINTS -->
+            <p
+              v-if="!isProductActive(product)"
+              class="m-0 mt-[2px] text-[0.76rem] text-[#c73f5b]"
+            >
+              This product is currently unavailable.
+            </p>
+            <p
+              v-else-if="product.stockQty === 0"
+              class="m-0 mt-[2px] text-[0.76rem] text-[#c73f5b]"
+            >
+              Out of stock.
+            </p>
+            <p
+              v-else-if="product.stockQty < 5"
+              class="m-0 mt-[2px] text-[0.76rem] text-[#c27c26]"
+            >
+              Limited stock – order soon.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
   </div>
 </template>
-
-<style scoped>
-.buyer-page {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-/* Header */
-.buyer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.buyer-header h2 {
-  margin: 0 0 0.2rem;
-  font-size: 1.45rem;
-  color: #2f3a2b;
-}
-
-.subtitle {
-  margin: 0;
-  color: #6f7569;
-  font-size: 0.95rem;
-}
-
-/* Chips */
-.chips-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: flex-end;
-}
-
-.chip {
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  border: 1px solid transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.chip-green {
-  background: #e3f3df;
-  border-color: #c0e2bc;
-  color: #356b3a;
-}
-
-.chip-orange {
-  background: #fff2de;
-  border-color: #f6c894;
-  color: #8a5b1f;
-}
-
-/* Cutoff banner */
-.cutoff-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.55rem 0.8rem;
-  border-radius: 10px;
-  background: #fff2de;
-  color: #7a5a1c;
-  font-size: 0.9rem;
-  border: 1px solid #f6c894;
-}
-
-.cutoff-banner.passed {
-  background: #ffe5e9;
-  border-color: #f6b8c2;
-  color: #a5394a;
-}
-
-.cutoff-icon {
-  font-size: 1.1rem;
-}
-
-/* Layout */
-.layout {
-  display: grid;
-  grid-template-columns: 2fr 1.4fr;
-  gap: 1.25rem;
-  align-items: flex-start;
-}
-
-/* Columns */
-.column {
-  background: rgba(242, 246, 238, 0.98);
-  border-radius: 18px;
-  padding: 1rem 1.1rem 1.1rem;
-  border: 1px solid #cfdcbe;
-  box-shadow: 0 10px 24px rgba(149, 170, 131, 0.3);
-  color: #2f3a2b;
-}
-
-.column-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.8rem;
-}
-
-.column-header h3 {
-  margin: 0;
-  font-size: 1.08rem;
-  color: #2f3a2b;
-}
-
-.column-subtitle {
-  margin: 0.15rem 0 0;
-  font-size: 0.85rem;
-  color: #6f7569;
-}
-
-/* Products grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 0.8rem;
-}
-
-.product-card {
-  background: #f8fbf4;
-  border-radius: 14px;
-  padding: 0.8rem 0.75rem;
-  border: 1px solid #d7e4c7;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  font-size: 0.9rem;
-  transition: transform 0.12s ease, box-shadow 0.15s ease,
-    border-color 0.15s ease, background 0.2s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 18px rgba(149, 170, 131, 0.4);
-  border-color: #c3d7ae;
-  background: #f3f8ec;
-}
-
-.product-card__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-}
-
-.product-card__header h4 {
-  margin: 0 0 0.15rem;
-  font-size: 0.98rem;
-  color: #2f3a2b;
-}
-
-.pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.pill {
-  padding: 0.12rem 0.45rem;
-  border-radius: 999px;
-  background: #f1e4ff;
-  font-size: 0.7rem;
-  color: #5d3a7a;
-}
-
-.pill-soft {
-  background: #f7ebde;
-  color: #7a5a36;
-}
-
-.badge {
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  border: 1px solid #d4ddc9;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #4e5b45;
-  background: #edf4e8;
-}
-
-.product-card__price {
-  margin-top: 0.1rem;
-  font-size: 0.92rem;
-}
-
-.price {
-  font-weight: 600;
-  color: #2f3a2b;
-}
-
-.price-unit {
-  color: #6f7569;
-}
-
-.product-card__stock {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  color: #5f6559;
-}
-
-.stock-dot {
-  font-size: 0.85rem;
-}
-
-.stock-dot.success {
-  color: #4caf6f;
-}
-
-.stock-dot.warning {
-  color: #f2b546;
-}
-
-.stock-dot.danger {
-  color: #e45d79;
-}
-
-/* Actions */
-.product-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin-top: 0.2rem;
-}
-
-.qty-input {
-  width: 72px;
-  padding: 0.28rem 0.4rem;
-  border-radius: 9px;
-  border: 1px solid #cfdcc3;
-  background: #fdfcf9;
-  color: #2f3a2b;
-  font-size: 0.8rem;
-  outline: none;
-}
-
-.qty-input:focus {
-  border-color: #8ac79e;
-  box-shadow: 0 0 0 2px rgba(138, 199, 158, 0.35);
-}
-
-/* Buttons */
-.btn {
-  border: none;
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-
-.btn-add {
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  color: #2f3a2b;
-}
-
-.btn-add:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 14px rgba(153, 169, 140, 0.5);
-}
-
-.btn-add:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-/* Product hints */
-.hint {
-  margin: 0.1rem 0 0;
-  font-size: 0.76rem;
-}
-
-.hint.warning {
-  color: #c27c26;
-}
-
-.hint.danger {
-  color: #c73f5b;
-}
-
-/* Order panel fields */
-.field {
-  margin-bottom: 0.7rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.field label {
-  font-size: 0.8rem;
-  color: #4f5a43;
-}
-
-.field input {
-  padding: 0.4rem 0.55rem;
-  font-size: 0.88rem;
-  border-radius: 9px;
-  border: 1px solid #cfdcc3;
-  background: #fdfcf9;
-  color: #2f3a2b;
-  outline: none;
-}
-
-.field input:focus {
-  border-color: #8ac79e;
-  box-shadow: 0 0 0 2px rgba(138, 199, 158, 0.35);
-}
-
-/* Cart */
-.order-items-title {
-  margin: 0.4rem 0 0.3rem;
-  font-size: 0.96rem;
-  color: #2f3a2b;
-}
-
-.cart-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  margin-bottom: 0.4rem;
-  max-height: 260px;
-  overflow-y: auto;
-}
-
-.cart-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.7rem;
-  padding: 0.5rem 0.55rem;
-  border-radius: 11px;
-  background: #edf4e8;
-}
-
-.cart-row__info h5 {
-  margin: 0 0 0.15rem;
-  font-size: 0.9rem;
-  color: #2f3a2b;
-}
-
-.cart-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #6f7569;
-}
-
-.cart-row__total {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
-}
-
-.cart-total-line {
-  font-size: 0.86rem;
-  color: #2f3a2b;
-}
-
-.link-btn {
-  border: none;
-  background: none;
-  padding: 0;
-  font-size: 0.78rem;
-  color: #c73f5b;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-/* Info & messages */
-.info {
-  padding: 0.4rem 0;
-  font-size: 0.86rem;
-  color: #5c6157;
-}
-
-.info.small {
-  font-size: 0.8rem;
-  color: #8a8f84;
-}
-
-.error {
-  color: #b3343f;
-  background: #ffe5e9;
-  border-radius: 10px;
-  border: 1px solid #f6b8c2;
-  padding: 0.45rem 0.6rem;
-  margin: 0.4rem 0;
-  font-size: 0.85rem;
-}
-
-.success {
-  color: #356b3a;
-  background: #e3f3df;
-  border-radius: 10px;
-  border: 1px solid #c0e2bc;
-  padding: 0.45rem 0.6rem;
-  margin: 0.4rem 0;
-  font-size: 0.85rem;
-}
-
-/* Total + primary button */
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.3rem;
-  font-size: 0.92rem;
-  color: #2f3a2b;
-}
-
-.primary-btn {
-  margin-top: 0.7rem;
-  width: 100%;
-  padding: 0.55rem 1rem;
-  font-size: 0.96rem;
-  background: linear-gradient(135deg, #f2b075, #8ac79e);
-  color: #2f3a2b;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-
-.primary-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 18px rgba(153, 169, 140, 0.5);
-}
-
-.primary-btn:disabled {
-  opacity: 0.55;
-  cursor: default;
-  box-shadow: none;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .buyer-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .chips-row {
-    justify-content: flex-start;
-  }
-}
-</style>
