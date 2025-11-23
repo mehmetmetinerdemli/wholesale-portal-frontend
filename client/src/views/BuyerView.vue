@@ -137,7 +137,7 @@ async function loadProducts() {
       quantityToOrder: 0,
       price: Number(p.price),
       stockQty: Number(p.stockQty),
-    }));
+    })).sort((a,b) => a.name.localeCompare(b.name));
   } catch (err) {
     console.error(err);
     error.value = err.message || "Unknown error";
