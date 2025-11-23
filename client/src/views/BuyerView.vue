@@ -263,7 +263,7 @@ async function submitOrder() {
     <!-- HEADER -->
     <header class="flex flex-col justify-between gap-3 md:flex-row md:items-start">
       <div>
-        <h2 class="m-0 mb-1 text-[1.45rem] font-semibold text-[#2f3a2b]">
+        <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
           Buyer – Create Order 🧺
         </h2>
         <p class="m-0 text-[0.95rem] text-[#6f7569]">

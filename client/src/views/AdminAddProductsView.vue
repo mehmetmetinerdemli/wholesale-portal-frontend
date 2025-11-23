@@ -104,7 +104,7 @@ function goToProducts() {
           🧺
         </div>
         <div>
-          <h2 class="m-0 mb-1 text-[1.45rem] font-semibold text-[#2f2737]">
+          <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
             Admin – Add Product
           </h2>
           <p class="m-0 text-[0.95rem] text-[#7b748e]">

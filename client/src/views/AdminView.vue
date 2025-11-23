@@ -134,7 +134,7 @@ function statusEmoji(status) {
           📊
         </div>
         <div>
-          <h2 class="m-0 mb-[0.15rem] text-[1.45rem] text-[#2f2737]">
+          <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
             Admin – Orders Overview
           </h2>
           <p class="m-0 text-[0.95rem] text-[#7a748d]">

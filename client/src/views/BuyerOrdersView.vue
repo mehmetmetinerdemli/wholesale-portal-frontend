@@ -98,7 +98,7 @@ function statusIcon(status) {
       class="mb-[0.25rem] flex items-center justify-between gap-[0.75rem] max-sm:flex-col max-sm:items-start"
     >
       <div>
-        <h2 class="m-0 mb-[0.2rem] text-[1.45rem] text-[#2f3a2b]">
+        <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
           Buyer – My Orders 🧺
         </h2>
         <p class="m-0 text-[0.95rem] text-[#6f7569]">
