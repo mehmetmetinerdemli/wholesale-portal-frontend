@@ -321,12 +321,12 @@ async function loadDailySummary() {
               />
             </label>
             <button
-              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-              @click="loadTopProducts"
-              :disabled="loadingTop"
-            >
-              {{ loadingTop ? "Loading…" : "Refresh" }}
-            </button>
+                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
+                  @click="loadTopProducts"
+                  :disabled="loadingTop"
+              >
+                  {{ loadingTop ? "Loading…" : "Refresh" }}
+              </button>
           </div>
         </div>
 
@@ -451,12 +451,12 @@ async function loadDailySummary() {
               />
             </label>
             <button
-              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-              @click="loadLowStock"
-              :disabled="loadingLow"
-            >
-              {{ loadingLow ? "Loading…" : "Refresh" }}
-            </button>
+                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
+                  @click="loadTopProducts"
+                  :disabled="loadingTop"
+              >
+                  {{ loadingTop ? "Loading…" : "Refresh" }}
+              </button>
           </div>
         </div>
 
@@ -568,12 +568,12 @@ async function loadDailySummary() {
               />
             </label>
             <button
-              class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium text-[#262130] transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-              @click="loadDailySummary"
-              :disabled="loadingDaily"
-            >
-              {{ loadingDaily ? "Loading…" : "Refresh" }}
-            </button>
+                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
+                  @click="loadTopProducts"
+                  :disabled="loadingTop"
+              >
+                  {{ loadingTop ? "Loading…" : "Refresh" }}
+              </button>
           </div>
         </div>
 
