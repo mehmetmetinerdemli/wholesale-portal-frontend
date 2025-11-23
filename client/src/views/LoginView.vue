@@ -149,7 +149,7 @@ async function handleRegister() {
           {{
             mode === "login"
               ? "Sign in to continue"
-              : "Register as a buyer to start ordering"
+              : "Register as a customer to start ordering"
           }}
         </p>
       </div>
@@ -171,7 +171,7 @@ async function handleRegister() {
             id="email"
             v-model="email"
             type="email"
-            placeholder="buyer@example.com"
+            placeholder="customer@example.com"
             class="rounded-[10px] border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.95rem] text-[#2f3a2b] outline-none transition focus:border-[#8ac79e] focus:bg-white focus:ring-2 focus:ring-[#8ac79e55]"
           />
         </div>
@@ -232,7 +232,7 @@ async function handleRegister() {
             info = '';
           "
         >
-          Create a buyer account
+          Create a customer account
         </button>
       </form>
 
@@ -371,7 +371,7 @@ async function handleRegister() {
         <code
           class="mt-1 inline-block rounded-[6px] border border-[#d4d0bf] bg-[#f3f0e6] px-2 py-1 text-[0.82rem]"
         >
-          buyer@example.com / buyer123
+          customer@example.com / customer123
         </code>
       </p>
     </div>
