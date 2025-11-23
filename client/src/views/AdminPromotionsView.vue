@@ -229,10 +229,10 @@ async function createPromotion() {
         </div>
         <div>
           <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
-            Admin – Promotions
+            Admin – Add Promotion
           </h2>
           <p class="m-0 text-[0.95rem] text-[#7b748e]">
-            Create and manage daily, weekly and monthly promotions for your buyers.
+            Create and manage daily, weekly and monthly promotions for your customers.
           </p>
         </div>
       </div>
@@ -324,7 +324,7 @@ async function createPromotion() {
             <input
               v-model="newPromotion.description"
               type="text"
-              placeholder="Short description for buyers"
+              placeholder="Short description for customers"
               class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.55rem] py-[0.42rem] text-[0.88rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#ffb88f] focus:shadow-[0_0_0_1px_rgba(255,184,143,0.45)]"
             />
           </div>

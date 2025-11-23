@@ -264,7 +264,7 @@ async function submitOrder() {
     <header class="flex flex-col justify-between gap-3 md:flex-row md:items-start">
       <div>
         <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
-          Buyer – Create Order 🧺
+          Customer – Create Order 🧺
         </h2>
         <p class="m-0 text-[0.95rem] text-[#6f7569]">
           Select fresh products, build your order and choose your delivery date.
@@ -316,7 +316,7 @@ async function submitOrder() {
 
         <!-- BUYER NAME -->
         <div class="mb-3 flex flex-col gap-1">
-          <label class="text-[0.8rem] text-[#4f5a43]">Buyer name</label>
+          <label class="text-[0.8rem] text-[#4f5a43]">Customer name</label>
           <input
             v-model="buyerName"
             type="text"

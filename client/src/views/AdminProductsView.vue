@@ -147,7 +147,7 @@ async function deleteProduct(product) {
         </div>
         <div>
           <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
-            Admin – Products
+            Admin – Products Overview
           </h2>
           <p class="m-0 text-[0.95rem] text-[#7b748e]">
             Manage the catalog: update prices and stock, add new items, and

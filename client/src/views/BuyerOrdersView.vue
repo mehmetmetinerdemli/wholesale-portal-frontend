@@ -99,7 +99,7 @@ function statusIcon(status) {
     >
       <div>
         <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
-          Buyer – My Orders 🧺
+          Customer – My Orders 🧺
         </h2>
         <p class="m-0 text-[0.95rem] text-[#6f7569]">
           Review your previous orders and quickly reorder your usual picks.
@@ -240,7 +240,7 @@ function statusIcon(status) {
         v-else
         class="py-[0.4rem] text-[0.8rem] text-[#8a8f84]"
       >
-        You don’t have any orders yet. Create one in the Buyer page.
+        You don’t have any orders yet. Create one in the Customer page.
       </p>
     </section>
   </div>

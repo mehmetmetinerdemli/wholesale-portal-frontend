@@ -59,7 +59,7 @@ function handleLogout() {
         <p
           class="mx-1 mt-2 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8d947f]"
         >
-          Buyer
+          Customer
         </p>
 
         <RouterLink
@@ -142,6 +142,14 @@ function handleLogout() {
           </RouterLink>
 
           <RouterLink
+            to="/admin/promotions"
+            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
+            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
+          >
+            Add Promotion
+          </RouterLink>
+
+          <RouterLink
             to="/admin/reports"
             class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
             active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
@@ -149,13 +157,7 @@ function handleLogout() {
             Admin Reports
           </RouterLink>
 
-          <RouterLink
-            to="/admin/promotions"
-            class="block rounded-full px-3 py-1.5 text-[13px] text-[#435040] transition hover:bg-[rgba(176,205,155,0.35)] hover:translate-x-[2px] hover:shadow-[0_4px_10px_rgba(139,164,117,0.4)]"
-            active-class="bg-gradient-to-r from-[#f2b075] to-[#8ac79e] text-[#263121] shadow-[0_8px_16px_rgba(191,170,123,0.55)]"
-          >
-            Admin Promotions
-          </RouterLink>
+          
         </template>
       </nav>
     </aside>
@@ -220,7 +222,7 @@ function handleLogout() {
                   'bg-[#cbe8c9] text-[#2f3a2b]': authState.user?.role === 'BUYER'
                 }"
               >
-                {{ authState.user?.role }}
+                {{ authState.user?.role === 'BUYER' ? 'CUSTOMER' : authState.user?.role}}
               </span>
             </div>
 

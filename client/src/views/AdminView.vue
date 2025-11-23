@@ -138,7 +138,7 @@ function statusEmoji(status) {
             Admin – Orders Overview
           </h2>
           <p class="m-0 text-[0.95rem] text-[#7a748d]">
-            Monitor all buyer orders, adjust statuses, and keep operations
+            Monitor all customer orders, adjust statuses, and keep operations
             flowing.
           </p>
         </div>
@@ -212,7 +212,7 @@ function statusEmoji(status) {
             <th
               class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
             >
-              Buyer
+              Customer
             </th>
             <th
               class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
@@ -351,7 +351,7 @@ function statusEmoji(status) {
         v-else
         class="py-[0.4rem] text-[0.8rem] text-[#9a9cb5]"
       >
-        No orders yet. Ask a buyer to create one.
+        No orders yet. Ask a customer to create one.
       </p>
     </section>
   </div>
