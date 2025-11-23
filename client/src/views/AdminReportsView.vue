@@ -321,12 +321,12 @@ async function loadDailySummary() {
               />
             </label>
             <button
-                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-                  @click="loadTopProducts"
-                  :disabled="loadingTop"
-              >
-                  {{ loadingTop ? "Loading…" : "Refresh" }}
-              </button>
+                class="rounded-[10px] border-none **bg-gradient-to-r from-purple-500 to-cyan-400** px-2.5 py-[0.3rem] text-[0.78rem] font-bold **text-gray-900** **shadow-lg shadow-purple-500/50** transition-all duration-300 **hover:from-purple-400 hover:to-cyan-300 hover:shadow-xl hover:shadow-cyan-400/60 hover:-translate-y-0.5** disabled:opacity-45 disabled:shadow-none"
+                @click="loadTopProducts"
+                :disabled="loadingTop"
+            >
+                {{ loadingTop ? "Loading…" : "Refresh" }}
+            </button>
           </div>
         </div>
 
@@ -451,12 +451,12 @@ async function loadDailySummary() {
               />
             </label>
             <button
-                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-                  @click="loadTopProducts"
-                  :disabled="loadingTop"
-              >
-                  {{ loadingTop ? "Loading…" : "Refresh" }}
-              </button>
+                class="rounded-[10px] border-none **bg-gradient-to-r from-purple-500 to-cyan-400** px-2.5 py-[0.3rem] text-[0.78rem] font-bold **text-gray-900** **shadow-lg shadow-purple-500/50** transition-all duration-300 **hover:from-purple-400 hover:to-cyan-300 hover:shadow-xl hover:shadow-cyan-400/60 hover:-translate-y-0.5** disabled:opacity-45 disabled:shadow-none"
+                @click="loadTopProducts"
+                :disabled="loadingTop"
+            >
+                {{ loadingTop ? "Loading…" : "Refresh" }}
+            </button>
           </div>
         </div>
 
@@ -567,13 +567,13 @@ async function loadDailySummary() {
                 class="w-[70px] rounded-[8px] border border-[#5c566c] bg-[#2e2938] px-[0.45rem] py-[0.3rem] text-[0.85rem] text-[#f5f3ff] outline-none focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.35)]"
               />
             </label>
-            <button
-                  class="rounded-[10px] border-none bg-[linear-gradient(120deg,#a8f0ad,#87d4ff)] px-2.5 py-[0.3rem] text-[0.78rem] font-medium **text-[#1a1a2e]** transition-transform transition-shadow hover:-translate-y-[1px] hover:shadow-[0_4px_10px_rgba(152,235,195,0.4)] disabled:opacity-45 disabled:shadow-none"
-                  @click="loadTopProducts"
-                  :disabled="loadingTop"
-              >
-                  {{ loadingTop ? "Loading…" : "Refresh" }}
-              </button>
+           <button
+                class="rounded-[10px] border-none **bg-gradient-to-r from-purple-500 to-cyan-400** px-2.5 py-[0.3rem] text-[0.78rem] font-bold **text-gray-900** **shadow-lg shadow-purple-500/50** transition-all duration-300 **hover:from-purple-400 hover:to-cyan-300 hover:shadow-xl hover:shadow-cyan-400/60 hover:-translate-y-0.5** disabled:opacity-45 disabled:shadow-none"
+                @click="loadTopProducts"
+                :disabled="loadingTop"
+            >
+                {{ loadingTop ? "Loading…" : "Refresh" }}
+            </button>
           </div>
         </div>
 
