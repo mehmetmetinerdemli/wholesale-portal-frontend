@@ -49,11 +49,8 @@ async function handleLogin() {
     const data = await response.json();
     setAuth(data.user, data.token);
 
-    if (data.user.role === "ADMIN") {
-      router.push("/admin");
-    } else {
-      router.push("/buyer");
-    }
+    // Always go to product catalog first (for both admin and buyer)
+    router.push("/buyer");
   } catch (err) {
     console.error(err);
     error.value = err.message || "Error while logging in.";
@@ -107,11 +104,8 @@ async function handleRegister() {
     if (data.user && data.token) {
       setAuth(data.user, data.token);
 
-      if (data.user.role === "ADMIN") {
-        router.push("/admin");
-      } else {
-        router.push("/buyer");
-      }
+      // Always go to product catalog first (for both admin and buyer)
+      router.push("/buyer");
       return;
     }
 

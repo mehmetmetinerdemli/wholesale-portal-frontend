@@ -97,7 +97,8 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.path === "/login" && loggedIn) {
-    return next(isAdmin() ? "/admin" : "/buyer");
+    // Always go to product catalog first (for both admin and buyer)
+    return next("/buyer");
   }
 
   next();

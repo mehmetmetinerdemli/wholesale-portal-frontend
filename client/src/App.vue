@@ -29,10 +29,10 @@ function handleLogout() {
 
         <div class="space-y-0.5">
           <h2 class="m-0 text-[15px] font-semibold text-[#333c2f]">
-            Wholesale Portal
+            ELSO
           </h2>
           <p class="m-0 text-[11px] text-[#767f70]">
-            Orders &amp; Inventory
+            Elite Solutions
           </p>
 
           <!-- Buyer company name -->
@@ -170,10 +170,10 @@ function handleLogout() {
       >
         <div>
           <h1 class="m-0 text-[18px] font-semibold text-[#313927]">
-            Wholesale Tracking Portal
+            ELSO - Wholesale Tracking Portal
           </h1>
           <p class="mt-[2px] text-[12px] text-[#7a806a]">
-            Manage fresh produce orders, inventory &amp; reports.
+            Elite Solutions • Orders, Inventory &amp; Reports
           </p>
         </div>
 
