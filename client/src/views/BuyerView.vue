@@ -7,7 +7,6 @@ const products = ref([]);
 const loading = ref(true);
 const error = ref("");
 
-// order creation state
 const buyerName = ref(authState.user?.name || "");
 const deliveryDate = ref("");
 const deliveryMinDate = ref("");
@@ -16,12 +15,10 @@ const orderSubmitting = ref(false);
 const orderMessage = ref("");
 const orderError = ref("");
 
-// cut-off UI
 const cutoffInfo = ref("");
 const cutoffPassed = ref(false);
 let cutoffIntervalId = null;
 
-// keep in sync with backend .env
 const CUTOFF_HOUR = 16;
 const CUTOFF_MINUTE = 0;
 
@@ -82,14 +79,11 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (cutoffIntervalId) {
-    clearInterval(cutoffIntervalId);
-  }
+  if (cutoffIntervalId) clearInterval(cutoffIntervalId);
 });
 
 function updateCutoffInfo() {
   const now = new Date();
-
   const cutoffToday = new Date(
     now.getFullYear(),
     now.getMonth(),
@@ -108,7 +102,6 @@ function updateCutoffInfo() {
 
   cutoffPassed.value = false;
   const diffMs = cutoffToday.getTime() - now.getTime();
-
   const totalSeconds = Math.floor(diffMs / 1000);
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -125,19 +118,18 @@ async function loadProducts() {
 
   try {
     const response = await fetch("http://localhost:4000/api/products");
-
-    if (!response.ok) {
-      throw new Error("Failed to load products");
-    }
+    if (!response.ok) throw new Error("Failed to load products");
 
     const data = await response.json();
 
-    products.value = data.map((p) => ({
-      ...p,
-      quantityToOrder: 0,
-      price: Number(p.price),
-      stockQty: Number(p.stockQty),
-    })).sort((a,b) => a.name.localeCompare(b.name));
+    products.value = data
+      .map((p) => ({
+        ...p,
+        quantityToOrder: 0,
+        price: Number(p.price),
+        stockQty: Number(p.stock_qty ?? p.stockQty),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   } catch (err) {
     console.error(err);
     error.value = err.message || "Unknown error";
@@ -151,7 +143,6 @@ function addToCart(product) {
   orderError.value = "";
 
   const qty = Number(product.quantityToOrder);
-
   if (!qty || qty <= 0) {
     alert("Please enter a quantity greater than 0.");
     return;
@@ -165,7 +156,7 @@ function addToCart(product) {
 
   if (totalRequested > product.stockQty) {
     alert(
-      `Not enough stock for "${product.name}". You already have ${alreadyInCart} in the cart and you tried to add ${qty}. Available: ${product.stockQty}.`
+      `Not enough stock for "${product.name}". You already have ${alreadyInCart} in the cart and tried to add ${qty}. Available: ${product.stockQty}.`
     );
     return;
   }
@@ -243,9 +234,9 @@ async function submitOrder() {
       return;
     }
 
-    orderMessage.value = `Order #${result.id} created successfully. Status: ${
-      result.status
-    }, total: € ${result.totalAmount.toFixed(2)}`;
+    orderMessage.value = `Order #${result.id} created. Status: ${result.status}, total: € ${result.totalAmount.toFixed(
+      2
+    )}`;
 
     cartItems.value = [];
     await loadProducts();
@@ -260,32 +251,29 @@ async function submitOrder() {
 
 <template>
   <div class="flex flex-col gap-4">
+    
     <!-- HEADER -->
     <header class="flex flex-col justify-between gap-3 md:flex-row md:items-start">
       <div>
-        <h2 class="m-0 text-[1.45rem] font-semibold tracking-tight text-[#2f2737]">
+        <h2 class="text-[1.45rem] font-semibold text-[#2f2737] m-0">
           Customer – Create Order 🧺
         </h2>
-        <p class="m-0 text-[0.95rem] text-[#6f7569]">
-          Select fresh products, build your order and choose your delivery date.
+        <p class="text-[0.95rem] text-[#6f7569] m-0">
+          Select products, build your order and choose your delivery date.
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center justify-end gap-2">
-        <span
-          class="inline-flex items-center gap-1 rounded-full border border-[#c0e2bc] bg-[#e3f3df] px-2.5 py-[0.15rem] text-[0.75rem] text-[#356b3a]"
-        >
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="rounded-full border border-[#c0e2bc] bg-[#e3f3df] px-2.5 py-[0.15rem] text-[0.75rem] text-[#356b3a]">
           🥬 Live stock
         </span>
-        <span
-          class="inline-flex items-center gap-1 rounded-full border border-[#f6c894] bg-[#fff2de] px-2.5 py-[0.15rem] text-[0.75rem] text-[#8a5b1f]"
-        >
+        <span class="rounded-full border border-[#f6c894] bg-[#fff2de] px-2.5 py-[0.15rem] text-[0.75rem] text-[#8a5b1f]">
           🥕 Next-day delivery (before cut-off)
         </span>
       </div>
     </header>
 
-    <!-- CUTOFF BANNER -->
+    <!-- CUT-OFF INFO -->
     <div
       v-if="cutoffInfo"
       class="flex items-center gap-2 rounded-xl border px-3 py-2 text-[0.9rem]"
@@ -293,88 +281,68 @@ async function submitOrder() {
         ? 'border-[#f6b8c2] bg-[#ffe5e9] text-[#a5394a]'
         : 'border-[#f6c894] bg-[#fff2de] text-[#7a5a1c]'"
     >
-      <span class="text-[1.1rem]">⏰</span>
+      <span>⏰</span>
       <span>{{ cutoffInfo }}</span>
     </div>
 
-    <!-- LAYOUT -->
-    <section
-      class="grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)] items-start"
-    >
-      <!-- CREATE ORDER PANEL (TOP / LEFT) -->
-      <div
-        class="order-1 flex flex-col rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] px-4 py-4 shadow-[0_10px_24px_rgba(149,170,131,0.30)] md:order-none"
-      >
-        <header class="mb-3 flex flex-col gap-1">
-          <h3 class="m-0 text-[1.05rem] font-semibold text-[#2f3a2b]">
-            Create Order
-          </h3>
-          <p class="m-0 text-[0.85rem] text-[#6f7569]">
-            Review your cart, choose a delivery date and submit your order.
-          </p>
-        </header>
+    <!-- MAIN LAYOUT -->
+    <section class="grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.6fr)]">
+      
+      <!-- LEFT: CREATE ORDER PANEL -->
+      <div class="rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] p-4 shadow">
+        
+        <h3 class="text-[1.05rem] font-semibold text-[#2f3a2b] m-0">Create Order</h3>
+        <p class="text-[0.85rem] text-[#6f7569] mb-3">
+          Review your cart, choose a delivery date and submit.
+        </p>
 
         <!-- BUYER NAME -->
-        <div class="mb-3 flex flex-col gap-1">
+        <div class="mb-3">
           <label class="text-[0.8rem] text-[#4f5a43]">Customer name</label>
           <input
             v-model="buyerName"
-            type="text"
             disabled
-            :placeholder="authState.user?.name || 'Logged-in buyer'"
-            class="w-full rounded-lg border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.88rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
+            class="w-full rounded-lg border bg-white px-3 py-2 text-[0.88rem]"
           />
         </div>
 
         <!-- DELIVERY DATE -->
-        <div class="mb-3 flex flex-col gap-1">
-          <label for="deliveryDate" class="text-[0.8rem] text-[#4f5a43]"
-            >Delivery date</label
-          >
+        <div class="mb-3">
+          <label class="text-[0.8rem] text-[#4f5a43]">Delivery date</label>
           <input
-            id="deliveryDate"
             v-model="deliveryDate"
             type="date"
             :min="deliveryMinDate"
-            class="w-full rounded-lg border border-[#cfdcc3] bg-[#fdfcf9] px-3 py-2 text-[0.88rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
+            class="w-full rounded-lg border bg-white px-3 py-2 text-[0.88rem]"
           />
         </div>
 
         <!-- CART ITEMS -->
-        <h4 class="mt-1 mb-2 text-[0.96rem] font-semibold text-[#2f3a2b]">
-          Order items
-        </h4>
+        <h4 class="text-[0.96rem] font-semibold text-[#2f3a2b]">Order items</h4>
 
         <p v-if="cartItems.length === 0" class="text-[0.8rem] text-[#8a8f84]">
-          No items in the order yet. Add some from the product list.
+          No items yet. Add some from the product list.
         </p>
 
         <div
           v-else
-          class="mb-2 flex max-h-64 flex-col gap-2 overflow-y-auto"
+          class="max-h-64 overflow-y-auto flex flex-col gap-2 mb-2"
         >
           <div
             v-for="item in cartItems"
             :key="item.productId"
-            class="flex justify-between gap-3 rounded-xl bg-[#edf4e8] px-3 py-2"
+            class="flex justify-between bg-[#edf4e8] rounded-xl px-3 py-2"
           >
             <div>
-              <h5 class="m-0 mb-[2px] text-[0.9rem] font-medium text-[#2f3a2b]">
-                {{ item.name }}
-              </h5>
-              <p class="m-0 text-[0.8rem] text-[#6f7569]">
+              <h5 class="text-[0.9rem] text-[#2f3a2b] m-0">{{ item.name }}</h5>
+              <p class="text-[0.8rem] text-[#6f7569] m-0">
                 {{ item.quantity }} × € {{ item.unitPrice.toFixed(2) }}
               </p>
             </div>
 
-            <div class="flex flex-col items-end gap-1">
-              <span class="text-[0.86rem] text-[#2f3a2b]">
-                € {{ (item.unitPrice * item.quantity).toFixed(2) }}
-              </span>
-              <button
-                class="cursor-pointer text-[0.78rem] text-[#c73f5b] underline"
-                @click="removeFromCart(item.productId)"
-              >
+            <div class="flex flex-col items-end">
+              <span>€ {{ (item.unitPrice * item.quantity).toFixed(2) }}</span>
+              <button class="text-[#c73f5b] underline text-[0.78rem]" @click="removeFromCart(item.productId)">
                 remove
               </button>
             </div>
@@ -384,128 +352,108 @@ async function submitOrder() {
         <!-- TOTAL -->
         <div
           v-if="cartItems.length > 0"
-          class="mt-1 flex items-center justify-between text-[0.92rem] text-[#2f3a2b]"
+          class="flex justify-between text-[0.92rem] text-[#2f3a2b]"
         >
           <span>Total:</span>
           <strong>€ {{ cartTotal().toFixed(2) }}</strong>
         </div>
 
-        <!-- MESSAGES -->
-        <div
-          v-if="orderError"
-          class="mt-2 rounded-xl border border-[#f6b8c2] bg-[#ffe5e9] px-3 py-2 text-[0.85rem] text-[#b3343f]"
-        >
+        <!-- ERRORS -->
+        <div v-if="orderError" class="text-red-600 border bg-red-50 rounded p-2 mt-2">
           {{ orderError }}
         </div>
-
-        <div
-          v-if="orderMessage"
-          class="mt-2 rounded-xl border border-[#c0e2bc] bg-[#e3f3df] px-3 py-2 text-[0.85rem] text-[#356b3a]"
-        >
+        <div v-if="orderMessage" class="text-green-700 border bg-green-50 rounded p-2 mt-2">
           {{ orderMessage }}
         </div>
 
-        <!-- PLACE ORDER BUTTON (same style family as create promotion) -->
+        <!-- PLACE ORDER BUTTON (updated to Reorder style) -->
         <button
-  class="cursor-pointer rounded-full px-4 py-[0.55rem] text-[0.96rem] font-semibold
-         bg-[linear-gradient(135deg,#d98968,#d25564)] text-[#3a1c1f]
-         border border-[#f1737e]
-         shadow-[0_10px_20px_rgba(210,85,100,0.55)]
-         transition-all duration-150 ease-out
-         hover:-translate-y-[1px] hover:shadow-[0_14px_26px_rgba(210,85,100,0.75)]
-         disabled:cursor-default disabled:opacity-60 disabled:shadow-none w-full mt-3"
-  :disabled="orderSubmitting || cartItems.length === 0"
-  @click="submitOrder"
->
-  {{ orderSubmitting ? "Placing order..." : "Place order" }}
-</button>
-
+          class="w-full mt-3 rounded-full px-4 py-2 text-[1rem] font-semibold
+                 bg-white text-[#3a1c1f]
+                 border border-[#f2cfd4]
+                 shadow-[0_10px_20px_rgba(210,85,100,0.25)]
+                 hover:shadow-[0_14px_26px_rgba(210,85,100,0.35)]
+                 transition-all duration-150
+                 disabled:opacity-60 disabled:cursor-default"
+          :disabled="orderSubmitting || cartItems.length === 0"
+          @click="submitOrder"
+        >
+          {{ orderSubmitting ? "Placing order..." : "Place order" }}
+        </button>
       </div>
 
-      <!-- PRODUCTS LIST -->
-      <div
-        class="rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] px-4 py-4 shadow-[0_10px_24px_rgba(149,170,131,0.30)]"
-      >
-        <header class="mb-3 flex items-start justify-between gap-2">
-          <div>
-            <h3 class="m-0 text-[1.08rem] font-semibold text-[#2f3a2b]">
-              Available Products
-            </h3>
-            <p class="m-0 mt-[2px] text-[0.85rem] text-[#6f7569]">
-              Browse today’s catalog and add quantities to your order.
-            </p>
-          </div>
-        </header>
+      <!-- RIGHT: PRODUCT LIST -->
+      <div class="rounded-2xl border border-[#cfdcbe] bg-[#f2f6ee] p-4 shadow">
+        
+        <h3 class="text-[1.08rem] font-semibold text-[#2f3a2b] m-0 mb-1">Available Products</h3>
+        <p class="text-[0.85rem] text-[#6f7569] m-0 mb-3">
+          Browse today’s catalog and add quantities.
+        </p>
 
-        <div v-if="loading" class="text-[0.86rem] text-[#5c6157]">
-          Loading products…
-        </div>
+        <!-- LOADING -->
+        <div v-if="loading" class="text-[#5c6157]">Loading products…</div>
+
+        <!-- ERROR -->
         <div
           v-else-if="error"
-          class="mt-2 rounded-xl border border-[#f6b8c2] bg-[#ffe5e9] px-3 py-2 text-[0.85rem] text-[#b3343f]"
+          class="border bg-red-50 text-red-700 rounded p-2"
         >
-          Error: {{ error }}
+          {{ error }}
         </div>
 
-        <div
-          v-else
-          class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
-        >
+        <!-- PRODUCT GRID -->
+        <div v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          
           <article
             v-for="product in products"
             :key="product.id"
-            class="flex flex-col gap-2 rounded-2xl border border-[#d7e4c7] bg-[#f8fbf4] px-3.5 py-3 text-[0.9rem] shadow-[0_6px_14px_rgba(149,170,131,0.25)] transition-all duration-150 hover:-translate-y-[2px] hover:border-[#c3d7ae] hover:bg-[#f3f8ec] hover:shadow-[0_10px_18px_rgba(149,170,131,0.40)]"
+            class="flex flex-col gap-3 rounded-2xl border border-[#d7e4c7] bg-[#f8fbf4] px-3.5 py-3
+                   shadow transition duration-150 hover:-translate-y-[2px] hover:border-[#c3d7ae] hover:bg-[#f3f8ec]"
           >
-            <!-- HEADER with KG badge, no weird empty space -->
-            <header
-              class="flex items-start justify-between gap-2"
-            >
-              <div class="flex flex-col">
-                <h4
-                  class="m-0 mb-[3px] text-[0.98rem] font-semibold text-[#2f3a2b]"
-                >
-                  {{ product.name }}
-                </h4>
+            
+            <!-- IMAGE -->
+            <div class="w-full h-36 rounded-xl overflow-hidden border border-[#d7e4c7] bg-[#eef3e8]">
+              <img
+                v-if="product.image_url"
+                :src="`http://localhost:4000${product.image_url}`"
+                class="w-full h-full object-cover"
+              />
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-[#8a8f84]"
+              >
+                No image
+              </div>
+            </div>
 
-                <div class="flex flex-wrap gap-1">
-                  <span
-                    v-if="product.grade"
-                    class="rounded-full bg-[#f1e4ff] px-2 py-[2px] text-[0.7rem] text-[#5d3a7a]"
-                  >
-                    {{ product.grade }}
-                  </span>
-                  <span
-                    v-if="product.origin"
-                    class="rounded-full bg-[#f7ebde] px-2 py-[2px] text-[0.7rem] text-[#7a5a36]"
-                  >
-                    {{ product.origin }}
-                  </span>
+            <!-- HEADER -->
+            <header class="flex justify-between">
+              <div>
+                <h4 class="font-semibold text-[#2f3a2b] m-0">{{ product.name }}</h4>
+                <div class="flex gap-1 mt-1">
+                  <span v-if="product.grade" class="bg-purple-100 text-purple-700 px-2 rounded-full text-xs">{{ product.grade }}</span>
+                  <span v-if="product.origin" class="bg-yellow-100 text-yellow-700 px-2 rounded-full text-xs">{{ product.origin }}</span>
                 </div>
               </div>
 
-              <span
-                class="inline-flex items-center justify-center rounded-full border border-[#d4ddc9] bg-[#edf4e8] px-3 py-1 text-[0.75rem] text-[#4e5b45]"
-              >
+              <span class="border bg-green-50 border-green-200 text-green-800 px-2 rounded-full text-xs flex items-center">
                 {{ product.unit }}
               </span>
             </header>
 
             <!-- PRICE -->
-            <div class="mt-[2px] text-[0.92rem]">
-              <span class="font-semibold text-[#2f3a2b]">
-                € {{ product.price.toFixed(2) }}
-              </span>
-              <span class="text-[#6f7569]"> / {{ product.unit }}</span>
+            <div class="text-[#2f3a2b]">
+              <strong>€ {{ product.price.toFixed(2) }}</strong>
+              <span class="text-[#6f7569]">/ {{ product.unit }}</span>
             </div>
 
             <!-- STOCK -->
-            <div class="flex items-center gap-1 text-[0.8rem] text-[#5f6559]">
+            <div class="flex items-center gap-1 text-sm text-[#5f6559]">
               <span
-                class="text-[0.85rem]"
                 :class="{
-                  'text-[#4caf6f]': stockClass(product) === 'success',
-                  'text-[#f2b546]': stockClass(product) === 'warning',
-                  'text-[#e45d79]': stockClass(product) === 'danger'
+                  'text-green-600': stockClass(product) === 'success',
+                  'text-yellow-500': stockClass(product) === 'warning',
+                  'text-red-500': stockClass(product) === 'danger'
                 }"
               >
                 ●
@@ -514,25 +462,24 @@ async function submitOrder() {
             </div>
 
             <!-- ACTIONS -->
-            <div class="mt-1 flex items-center gap-2">
+            <div class="flex gap-2">
               <input
                 v-model.number="product.quantityToOrder"
                 type="number"
                 min="0"
                 :max="product.stockQty"
                 placeholder="Qty"
-                class="w-[80px] rounded-xl border border-[#cfdcc3] bg-[#fdfcf9] px-2 py-2 text-[0.8rem] text-[#2f3a2b] outline-none focus:border-[#8ac79e] focus:ring-2 focus:ring-[#8ac79e]/40"
+                class="w-[80px] rounded-xl border bg-white px-2 py-1 text-sm"
               />
 
-              <!-- ADD BUTTON – SAME STYLE AS REORDER -->
+              <!-- ADD BUTTON — updated to match Reorder style -->
               <button
-                class="cursor-pointer rounded-full px-4 py-[0.45rem] text-[0.88rem] font-semibold
-                       bg-[linear-gradient(135deg,#d98968,#d25564)] text-[#3a1c1f]
-                       border border-[#f1737e]
-                       shadow-[0_10px_20px_rgba(210,85,100,0.55)]
-                       transition-all duration-150 ease-out
-                       hover:-translate-y-[1px] hover:shadow-[0_14px_26px_rgba(210,85,100,0.75)]
-                       disabled:cursor-default disabled:opacity-60 disabled:shadow-none"
+                class="rounded-full px-4 py-1.5 text-[0.88rem] font-semibold
+                       bg-white text-[#3a1c1f]
+                       border border-[#f2cfd4]
+                       shadow-[0_6px_14px_rgba(210,85,100,0.25)]
+                       hover:shadow-[0_10px_20px_rgba(210,85,100,0.45)]
+                       transition-all duration-150"
                 :disabled="!canAdd(product)"
                 @click="addToCart(product)"
               >
@@ -541,27 +488,20 @@ async function submitOrder() {
             </div>
 
             <!-- HINTS -->
-            <p
-              v-if="!isProductActive(product)"
-              class="m-0 mt-[2px] text-[0.76rem] text-[#c73f5b]"
-            >
-              This product is currently unavailable.
+            <p v-if="!isProductActive(product)" class="text-red-500 text-xs m-0">
+              This product is unavailable.
             </p>
-            <p
-              v-else-if="product.stockQty === 0"
-              class="m-0 mt-[2px] text-[0.76rem] text-[#c73f5b]"
-            >
+            <p v-else-if="product.stockQty === 0" class="text-red-500 text-xs m-0">
               Out of stock.
             </p>
-            <p
-              v-else-if="product.stockQty < 5"
-              class="m-0 mt-[2px] text-[0.76rem] text-[#c27c26]"
-            >
-              Limited stock – order soon.
+            <p v-else-if="product.stockQty < 5" class="text-yellow-600 text-xs m-0">
+              Limited stock.
             </p>
+
           </article>
         </div>
       </div>
+
     </section>
   </div>
 </template>

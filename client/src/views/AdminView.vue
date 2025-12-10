@@ -11,6 +11,17 @@ onMounted(() => {
   loadOrders();
 });
 
+// DATE FORMATTER → Mar 13, 2026
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  });
+}
+
 async function loadOrders() {
   ordersLoading.value = true;
   ordersError.value = "";
@@ -52,7 +63,7 @@ async function changeOrderStatus(order, newStatus) {
   }
 
   const previousStatus = order.status;
-  order.status = newStatus; // optimistic update
+  order.status = newStatus;
 
   try {
     const response = await fetch(
@@ -73,7 +84,7 @@ async function changeOrderStatus(order, newStatus) {
     }
 
     const updatedOrder = await response.json();
-    order.status = updatedOrder.status; // sync
+    order.status = updatedOrder.status;
   } catch (err) {
     console.error(err);
     alert(
@@ -96,7 +107,6 @@ const openOrders = computed(
     ).length
 );
 
-// Tailwind classes for status pill variants
 function statusPillClass(status) {
   const s = (status || "").toUpperCase();
   if (s === "DELIVERED" || s === "COMPLETED")
@@ -121,9 +131,7 @@ function statusEmoji(status) {
 </script>
 
 <template>
-  <!-- page wrapper -->
   <div class="flex flex-col gap-[0.9rem] text-[#2f2737]">
-    <!-- header -->
     <header
       class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
     >
@@ -144,13 +152,8 @@ function statusEmoji(status) {
         </div>
       </div>
 
-      <div
-        class="flex flex-col items-end gap-[0.5rem] md:items-end"
-      >
-        <!-- chips -->
-        <div
-          class="flex flex-wrap justify-end gap-[0.35rem]"
-        >
+      <div class="flex flex-col items-end gap-[0.5rem] md:items-end">
+        <div class="flex flex-wrap justify-end gap-[0.35rem]">
           <span
             class="inline-flex items-center gap-[0.25rem] whitespace-nowrap rounded-full border border-[#94cbd4] bg-[#e4f6f7] px-[0.65rem] py-[0.25rem] text-[0.78rem] text-[#27636f]"
           >
@@ -165,7 +168,6 @@ function statusEmoji(status) {
           </span>
         </div>
 
-        <!-- refresh button -->
         <button
           class="cursor-pointer rounded-full border border-[#cbc4ef] bg-[#f4f0ff] px-[0.9rem] py-[0.32rem] text-[0.85rem] text-[#4b4c79] transition hover:bg-[#e5ddff] hover:shadow-[0_4px_10px_rgba(158,146,222,0.5)] disabled:cursor-default disabled:opacity-65"
           @click="loadOrders"
@@ -176,7 +178,6 @@ function statusEmoji(status) {
       </div>
     </header>
 
-    <!-- error -->
     <div
       v-if="ordersError"
       class="mt-1 rounded-[10px] border border-[#f3b5c2] bg-[#ffe7ed] px-[0.6rem] py-[0.45rem] text-[0.86rem] text-[#8b3b4a]"
@@ -184,7 +185,6 @@ function statusEmoji(status) {
       Error: {{ ordersError }}
     </div>
 
-    <!-- loading -->
     <div
       v-if="ordersLoading"
       class="py-[0.4rem] text-[0.86rem] text-[#6d6e8c]"
@@ -192,51 +192,35 @@ function statusEmoji(status) {
       Loading orders…
     </div>
 
-    <!-- main panel -->
     <section
       v-else
       class="rounded-[22px] border border-[#464059] px-[1.1rem] pt-[1rem] pb-[1.1rem] text-[#f5f3ff] shadow-[0_16px_32px_rgba(34,26,46,0.45)] bg-[radial-gradient(circle_at_top,#352d45_0%,#2b2636_55%,#262130_100%)]"
     >
-      <!-- table -->
       <table
         v-if="orders.length > 0"
         class="w-full border-collapse text-[0.88rem]"
       >
         <thead>
           <tr class="bg-[rgba(24,21,34,0.95)]">
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               ID
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Customer
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Company
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Delivery
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Status
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Total
             </th>
-            <th
-              class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]"
-            >
+            <th class="border-b border-[#47425c] px-[0.5rem] py-[0.55rem] text-left text-[0.8rem] font-semibold uppercase tracking-[0.08em] text-[#b9b4d7]">
               Items
             </th>
           </tr>
@@ -248,14 +232,10 @@ function statusEmoji(status) {
             :key="order.id"
             class="border-b border-[#3a344a] bg-[#2a2535] transition-colors hover:bg-[#383149] even:bg-[#30293e]"
           >
-            <!-- ID -->
-            <td
-              class="whitespace-nowrap px-[0.5rem] py-[0.55rem] font-semibold text-[#e3deff]"
-            >
+            <td class="whitespace-nowrap px-[0.5rem] py-[0.55rem] font-semibold text-[#e3deff]">
               #{{ order.id }}
             </td>
 
-            <!-- Buyer -->
             <td class="px-[0.5rem] py-[0.55rem]">
               <div class="flex items-center gap-[0.5rem]">
                 <span
@@ -268,27 +248,22 @@ function statusEmoji(status) {
                     {{ order.buyerName }}
                   </span>
                   <span class="text-[0.75rem] text-[#aaa7cf]">
-                    Created: {{ order.createdAt }}
+                    Created: {{ formatDate(order.createdAt) }}
                   </span>
                 </div>
               </div>
             </td>
 
-            <!-- Company -->
-            <td
-              class="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap px-[0.5rem] py-[0.55rem] text-[#e0ddf8]"
-            >
+            <td class="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap px-[0.5rem] py-[0.55rem] text-[#e0ddf8]">
               {{ order.buyerCompany }}
             </td>
 
-            <!-- Delivery -->
             <td class="px-[0.5rem] py-[0.55rem]">
               <span class="text-[0.85rem] text-[#e3e6a3]">
-                {{ order.deliveryDate }}
+                {{ formatDate(order.deliveryDate) }}
               </span>
             </td>
 
-            <!-- Status -->
             <td class="min-w-[180px] px-[0.5rem] py-[0.55rem]">
               <div class="flex flex-col gap-[0.25rem]">
                 <span
@@ -315,18 +290,12 @@ function statusEmoji(status) {
               </div>
             </td>
 
-            <!-- Total -->
-            <td
-              class="whitespace-nowrap px-[0.5rem] py-[0.55rem] font-medium text-[#f6c991]"
-            >
+            <td class="whitespace-nowrap px-[0.5rem] py-[0.55rem] font-medium text-[#f6c991]">
               € {{ Number(order.totalAmount).toFixed(2) }}
             </td>
 
-            <!-- Items -->
             <td class="px-[0.5rem] py-[0.55rem] align-top">
-              <ul
-                class="ml-4 list-disc text-[0.8rem] text-[#d5d4f3]"
-              >
+              <ul class="ml-4 list-disc text-[0.8rem] text-[#d5d4f3]">
                 <li
                   v-for="(item, idx) in order.items"
                   :key="idx"
@@ -346,7 +315,6 @@ function statusEmoji(status) {
         </tbody>
       </table>
 
-      <!-- no orders -->
       <p
         v-else
         class="py-[0.4rem] text-[0.8rem] text-[#9a9cb5]"

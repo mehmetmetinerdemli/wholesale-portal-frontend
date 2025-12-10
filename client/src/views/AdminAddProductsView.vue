@@ -14,6 +14,9 @@ const newProduct = ref({
   stockQty: 0,
 });
 
+const selectedImage = ref(null);
+const imagePreview = ref(null);
+
 const creating = ref(false);
 const error = ref("");
 const success = ref("");
@@ -27,6 +30,16 @@ function resetForm() {
     price: 0,
     stockQty: 0,
   };
+  selectedImage.value = null;
+  imagePreview.value = null;
+}
+
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  selectedImage.value = file;
+  imagePreview.value = URL.createObjectURL(file);
 }
 
 async function createProduct() {
@@ -50,24 +63,29 @@ async function createProduct() {
     return;
   }
 
+  // Build FormData instead of JSON
+  const formData = new FormData();
+  formData.append("name", p.name);
+  formData.append("grade", p.grade);
+  formData.append("origin", p.origin);
+  formData.append("unit", p.unit);
+  formData.append("price", p.price);
+  formData.append("stock_qty", p.stockQty);
+  formData.append("is_active", 1);
+
+  if (selectedImage.value) {
+    formData.append("image", selectedImage.value);
+  }
+
   creating.value = true;
 
   try {
     const response = await fetch("http://localhost:4000/api/products", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${authState.token}`,
       },
-      body: JSON.stringify({
-        name: p.name,
-        grade: p.grade,
-        origin: p.origin,
-        unit: p.unit,
-        price: Number(p.price),
-        stockQty: Number(p.stockQty),
-        isActive: 1,
-      }),
+      body: formData,
     });
 
     const data = await response.json().catch(() => ({}));
@@ -76,7 +94,7 @@ async function createProduct() {
       throw new Error(data.message || "Failed to create product");
     }
 
-    success.value = `Product "${data.name || p.name}" created successfully.`;
+    success.value = `Product "${p.name}" created successfully.`;
     resetForm();
   } catch (err) {
     console.error(err);
@@ -93,7 +111,6 @@ function goToProducts() {
 
 <template>
   <div class="flex flex-col gap-4 text-[#2f2737]">
-    <!-- Header -->
     <header
       class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
     >
@@ -122,7 +139,6 @@ function goToProducts() {
       </button>
     </header>
 
-    <!-- Messages -->
     <div
       v-if="error"
       class="rounded-[10px] border border-[#f4bac7] bg-[#ffe6eb] px-[0.6rem] py-[0.45rem] text-[0.86rem] text-[#933241]"
@@ -137,21 +153,13 @@ function goToProducts() {
       {{ success }}
     </div>
 
-    <!-- Main card -->
     <section
       class="grid gap-5 rounded-[22px] border border-[#464059] bg-[radial-gradient(circle_at_top,#352d45_0%,#2b2636_55%,#262130_100%)] px-5 pt-4 pb-5 text-[#f5f3ff] shadow-[0_16px_32px_rgba(34,26,46,0.45)] md:grid-cols-[1.4fr_1fr]"
     >
-      <!-- Form -->
-      <form
-        class="flex flex-col"
-        @submit.prevent="createProduct"
-      >
+      <form class="flex flex-col" @submit.prevent="createProduct">
         <h3 class="mb-2 text-[1.05rem] text-[#fdfcff]">
           New product details
         </h3>
-        <p class="mb-4 text-[0.85rem] text-[#bbb7d4]">
-          Fill in product information and click <strong>Create product</strong>.
-        </p>
 
         <!-- Name -->
         <div class="mb-3 flex flex-col gap-[0.3rem]">
@@ -160,102 +168,110 @@ function goToProducts() {
             v-model="newProduct.name"
             type="text"
             placeholder="Banana"
-            class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+            class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none"
           />
         </div>
 
-        <!-- Grade + Unit in row -->
+        <!-- Grade / Unit -->
         <div class="mb-3 grid gap-3 md:grid-cols-2">
-          <div class="flex flex-col gap-[0.3rem]">
+          <div class="flex flex-col">
             <label class="text-[0.8rem] text-[#e1ddff]">Grade</label>
             <input
               v-model="newProduct.grade"
               type="text"
-              placeholder="e.g. A"
-              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem]"
             />
           </div>
-          <div class="flex flex-col gap-[0.3rem]">
+
+          <div class="flex flex-col">
             <label class="text-[0.8rem] text-[#e1ddff]">Unit</label>
             <input
               v-model="newProduct.unit"
               type="text"
-              placeholder="e.g. kg"
-              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem]"
             />
           </div>
         </div>
 
         <!-- Origin -->
-        <div class="mb-3 flex flex-col gap-[0.3rem]">
+        <div class="mb-3 flex flex-col">
           <label class="text-[0.8rem] text-[#e1ddff]">Origin</label>
           <input
             v-model="newProduct.origin"
             type="text"
-            placeholder="e.g. Spain"
-            class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+            class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem]"
           />
         </div>
 
-        <!-- Price + Stock -->
-        <div class="mb-4 grid gap-3 md:grid-cols-2">
-          <div class="flex flex-col gap-[0.3rem]">
+        <!-- Price / Stock -->
+        <div class="mb-3 grid gap-3 md:grid-cols-2">
+          <div class="flex flex-col">
             <label class="text-[0.8rem] text-[#e1ddff]">Price (€)</label>
             <input
               v-model.number="newProduct.price"
               type="number"
-              step="0.01"
               min="0"
-              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+              step="0.01"
+              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem]"
             />
           </div>
-          <div class="flex flex-col gap-[0.3rem]">
+
+          <div class="flex flex-col">
             <label class="text-[0.8rem] text-[#e1ddff]">Stock quantity</label>
             <input
               v-model.number="newProduct.stockQty"
               type="number"
               min="0"
-              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[0.92rem] text-[#f7f5ff] outline-none placeholder:text-[#928eb0] focus:border-[#8ccf9a] focus:shadow-[0_0_0_1px_rgba(140,207,154,0.4)]"
+              class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem]"
             />
           </div>
         </div>
 
+        <!-- Image upload -->
+        <div class="mb-4 flex flex-col">
+          <label class="text-[0.8rem] text-[#e1ddff]">Product image</label>
+          <input
+            type="file"
+            accept="image/*"
+            @change="handleImage"
+            class="rounded-[9px] border border-[#524d67] bg-[#241f30] px-[0.7rem] py-[0.48rem] text-[#cfcbe8]"
+          />
+        </div>
+
         <!-- Submit -->
         <button
-  class="mt-[0.35rem] inline-flex w-full items-center justify-center rounded-full
-         bg-[linear-gradient(135deg,#8ccf9a,#4fa4d9)]
-         px-[0.8rem] py-[0.6rem] text-[0.92rem] font-medium
-         text-white tracking-wide
-         border border-[rgba(255,255,255,0.35)]
-         shadow-[0_0_10px_rgba(255,255,255,0.25),_inset_0_0_8px_rgba(0,0,0,0.3)]
-         hover:shadow-[0_0_18px_rgba(255,255,255,0.45),_0_10px_20px_rgba(79,164,217,0.45)]
-         hover:-translate-y-[1px]
-         transition disabled:opacity-60 disabled:shadow-none disabled:cursor-default"
-  type="submit"
-  :disabled="creating"
->
-  {{ creating ? "Creating..." : "Create product" }}
-</button>
-
-
-
+          class="mt-[0.35rem] inline-flex w-full items-center justify-center rounded-full bg-[linear-gradient(135deg,#8ccf9a,#4fa4d9)] px-[0.8rem] py-[0.6rem] text-[0.92rem] font-medium text-white"
+          type="submit"
+          :disabled="creating"
+        >
+          {{ creating ? "Creating..." : "Create product" }}
+        </button>
       </form>
 
-      <!-- Live preview card -->
+      <!-- Preview -->
       <div
-        class="mt-4 flex flex-col gap-3 rounded-[18px] border border-[#514563] bg-[radial-gradient(circle_at_top,#3d324d_0%,#2a2435_55%,#221d2b_100%)] p-4 text-sm text-[#f7f5ff] md:mt-0"
+        class="mt-4 flex flex-col gap-3 rounded-[18px] border border-[#514563] bg-[radial-gradient(circle_at_top,#3d324d_0%,#2a2435_55%,#221d2b_100%)] p-4 text-sm"
       >
-        <p class="mb-1 text-[0.8rem] uppercase tracking-[0.14em] text-[#a9a3d0]">
+        <p class="text-[#a9a3d0] text-xs uppercase tracking-widest">
           Preview
         </p>
 
-        <div class="flex items-center justify-between">
+        <!-- Preview image -->
+        <div
+          v-if="imagePreview"
+          class="w-full h-40 rounded-xl overflow-hidden border border-[#6b6281]"
+        >
+          <img :src="imagePreview" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
           <div>
-            <p class="m-0 text-xs text-[#9b95c0]">Product name</p>
-            <p class="m-0 text-[1.05rem] font-semibold text-white">
+            <p class="text-xs text-[#9b95c0]">Product name</p>
+            <p class="text-[1.1rem] font-semibold">
               {{ newProduct.name || "Example product" }}
             </p>
           </div>
+
           <span
             class="inline-flex items-center rounded-full bg-[#1e3b29] px-3 py-[0.2rem] text-[0.78rem] font-semibold text-[#e4ffe9]"
           >
@@ -263,46 +279,33 @@ function goToProducts() {
           </span>
         </div>
 
-        <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-[#c1bddf]">
-          <div class="space-y-1">
-            <p class="m-0 text-[0.7rem] uppercase tracking-[0.14em] text-[#8c86b2]">
-              Origin
-            </p>
-            <p class="m-0 text-[0.9rem] text-white">
-              {{ newProduct.origin || "—" }}
-            </p>
+        <div class="mt-3 grid grid-cols-2 gap-3 text-xs text-[#c1bddf]">
+          <div>
+            <p class="text-[#8c86b2] text-[0.7rem] uppercase">Origin</p>
+            <p>{{ newProduct.origin || "—" }}</p>
           </div>
-          <div class="space-y-1">
-            <p class="m-0 text-[0.7rem] uppercase tracking-[0.14em] text-[#8c86b2]">
-              Grade / Unit
-            </p>
-            <p class="m-0 text-[0.9rem] text-white">
-              {{ newProduct.grade || "—" }} <span v-if="newProduct.unit">·</span>
+
+          <div>
+            <p class="text-[#8c86b2] text-[0.7rem] uppercase">Grade / Unit</p>
+            <p>
+              {{ newProduct.grade || "—" }}
+              <span v-if="newProduct.unit">·</span>
               {{ newProduct.unit || "" }}
             </p>
           </div>
-          <div class="space-y-1">
-            <p class="m-0 text-[0.7rem] uppercase tracking-[0.14em] text-[#8c86b2]">
-              Price
-            </p>
-            <p class="m-0 text-[0.9rem] text-white">
-              € {{ newProduct.price || 0 }}
-            </p>
+
+          <div>
+            <p class="text-[#8c86b2] text-[0.7rem] uppercase">Price</p>
+            <p>€ {{ newProduct.price }}</p>
           </div>
-          <div class="space-y-1">
-            <p class="m-0 text-[0.7rem] uppercase tracking-[0.14em] text-[#8c86b2]">
-              Stock
-            </p>
-            <p class="m-0 text-[0.9rem] text-white">
-              {{ newProduct.stockQty || 0 }} {{ newProduct.unit || "" }}
+
+          <div>
+            <p class="text-[#8c86b2] text-[0.7rem] uppercase">Stock</p>
+            <p>
+              {{ newProduct.stockQty }} {{ newProduct.unit }}
             </p>
           </div>
         </div>
-
-        <p class="mt-3 text-[0.78rem] text-[#9590b8]">
-          This preview updates live while you type. When you’re happy with the
-          details, hit <span class="font-semibold">Create product</span>.
-        </p>
       </div>
     </section>
   </div>
